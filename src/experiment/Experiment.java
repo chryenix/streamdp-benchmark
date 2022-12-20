@@ -3,7 +3,7 @@ package experiment;
 
 import datagenerator.Generator;
 import datagenerator.StreamScalerAndStretcher;
-import mechansims.*;
+import mechanisms.*;
 
 import java.io.*;
 import java.util.*;

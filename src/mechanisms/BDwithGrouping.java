@@ -1,4 +1,4 @@
-package mechansims;
+package mechanisms;
 
 import util.MyArrayList;
 

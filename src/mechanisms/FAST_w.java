@@ -1,4 +1,4 @@
-package mechansims;
+package mechanisms;
 
 import java.util.ArrayList;
 import java.util.BitSet;

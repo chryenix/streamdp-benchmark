@@ -1,4 +1,4 @@
-package mechansims;
+package mechanisms;
 
 import experiment.LaplaceStream;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;

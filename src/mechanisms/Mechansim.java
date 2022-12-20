@@ -1,4 +1,4 @@
-package mechansims;
+package mechanisms;
 
 import experiment.Experiment;
 import experiment.LaplaceStream;
