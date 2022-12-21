@@ -6,11 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Random;
 
 import experiment.Experiment;
@@ -23,14 +20,40 @@ public class OutlierStream {
 	public static final int PLATEAU_OUTLIER 		  = 0;
 	public static final int EXTREMUM_OUTLIER 		  = 1;
 	public static final int PATTERN_EXTENSION_OUTLIER = 2;
+	public static final int REAL_WORLD_OUTLIER 		  = 3;
 	
 	public static final double IS_OUTLIER = 1.0d;
 	public static final double NO_OUTLIER = 0.0d;
 	
 	private static Random rand = new Random(12345);
 	
-	//Not supposed to be modified
-	//private final ArrayList<double[]> org_generated_stream;
+	public static String CSV_DIR = "./csv";
+	static final int OUTPUT_MODE_CONSOLE = 0;
+	static final int OUTPUT_MODE_FILE = 1;
+	static int OUTPUT_MODE = OUTPUT_MODE_CONSOLE; 
+	
+    //Experiment related stuff
+	static int[] mechanisms; 
+	static double[] epsilons; 
+	static int w; 
+	static double epsilon; 
+	static int[] w_s; 
+	static int num_iterations;
+	
+	static {//config
+        //Experiment related stuff
+        int[] all_mechanisms = {Experiment.KalmanFilterPID_FAST_w, Experiment.UNIFROM, Experiment.SAMPLE, Experiment.BD, Experiment.BA, Experiment.RESCUE_DP_MD, Experiment.PEGASUS, Experiment.DSATWEVENT, Experiment.ADAPUB};
+        int[] some_mechanisms = {Experiment.UNIFROM};
+        mechanisms = some_mechanisms;
+        double[] temp = {0.1, 0.3, 0.5, 0.7, 0.9, 1.0}; 
+        epsilons = temp;
+        w = 40;
+        epsilon = 1.0;
+        //int[] temp_2 = {40, 80, 120, 160, 200};
+        int[] temp_2 = {1, 2, 4, 8, 16, 32};
+        w_s = temp_2;
+        num_iterations = 100;
+	}
 	
 	public final ArrayList<double[]> outlier_stream;
 	private final int stream_dimensionality;
@@ -43,9 +66,23 @@ public class OutlierStream {
 	//TODO make configurable
 	int expected_season_length = 80;
 	
-	@SuppressWarnings("unchecked")
+	public OutlierStream(final ArrayList<Count> stream) {
+		this.stream_dimensionality = 1;//By definition of the Count class
+		if(stream_dimensionality!=1) {
+			System.err.println("OutlierStream: stream_dimensionality!=1");
+		}
+		this.outlier_type = REAL_WORLD_OUTLIER;
+		this.outlier_stream = new ArrayList<double[]>(stream.size());
+		this.outlier_score = new double[stream.size()];
+		for(int i=0;i<stream.size();i++) {
+			Count c = stream.get(i);
+			double[] temp = {c.count};
+			outlier_stream.add(temp);
+			outlier_score[i] = c.outlier_label;
+		}
+	}
+	
 	public OutlierStream(final ArrayList<double[]> org_generated_stream, final int outlier_type) {
-		//this.org_generated_stream 	= (ArrayList<double[]>) org_generated_stream.clone();
 		this.outlier_score 			= new double[org_generated_stream.size()];//init with 0
 		this.outlier_type 			= outlier_type;
 		this.stream_dimensionality = org_generated_stream.get(0).length;
@@ -71,7 +108,7 @@ public class OutlierStream {
 		}
 	}
 	
-    private void place_plateaus() {
+    void place_plateaus() {
      	final double plateau_threshold = 0.1*q_max;//make class member
      	double p = 0.3;//XXX
      	
@@ -98,7 +135,7 @@ public class OutlierStream {
     /**
      * Places *one* pattern extension outlier
      */
-    private void place_pattern_extension() {
+    void place_pattern_extension() {
     	int random_ts = expected_season_length+rand.nextInt(outlier_stream.size()-2*expected_season_length);//dice some random time stamp. Not in the first or last season.
     	//find the peaks to the left and right
     	
@@ -149,7 +186,7 @@ public class OutlierStream {
     }
     
     //TODO shall we bound the maximum number of extrema?
-    private void place_extrema() {
+    void place_extrema() {
     	double p = 0.01;//XXX
     	double multiplier = 1.5;//TODO make class member
      	final double extremum_value = multiplier*q_max;//make class member
@@ -165,7 +202,7 @@ public class OutlierStream {
     	}
 	}
 
-	private static double get_max(ArrayList<double[]> stream) {
+	static double get_max(ArrayList<double[]> stream) {
 		double max = Double.MIN_VALUE;
 		for(double[] ts : stream){
 			for(double v : ts){
@@ -184,7 +221,7 @@ public class OutlierStream {
 	 * @param stream
 	 * @return
 	 */
-	private int find_next_season_start(int season_start, int expexted_season_length, ArrayList<double[]> stream) {
+	int find_next_season_start(int season_start, int expexted_season_length, ArrayList<double[]> stream) {
 		int t = season_start+expexted_season_length/2;//that's where expect the peak of this season to be
 		int expected_peak_next_season = t+expexted_season_length;
 		
@@ -208,7 +245,7 @@ public class OutlierStream {
 		return ret;
 	}
 	
-	public static String to_file_output_string(final ArrayList<double[]> stream, double[] outlier_score) {
+	static String to_file_output_string(final ArrayList<double[]> stream, double[] outlier_score) {
 		if(stream.get(0).length!=1) {
 			return null;
 		}
@@ -222,13 +259,13 @@ public class OutlierStream {
 		return buffer.toString();
 	}
 	
-	public String to_file_output_string() {
+	String to_file_output_string() {
 		return to_file_output_string(outlier_stream, outlier_score);
 	}
 	
 	public static void main(String[] arg){
-		//generate_artificial_outlier_streams();
-		load_dodgers_dataset();
+		generate_artificial_outlier_streams();
+		//load_dodgers_dataset();
 	}
 	
 	static void generate_artificial_outlier_streams() {
@@ -238,15 +275,6 @@ public class OutlierStream {
         int streamLength = 1000;
         int num_iterations_per_Mechanism = 1;
         int num_iterations_per_dataParameterCombi = 1;
-        
-        //Experiment related stuff
-        int[] all_mechanisms = {Experiment.KalmanFilterPID_FAST_w, Experiment.UNIFROM, Experiment.SAMPLE, Experiment.BD, Experiment.BA, Experiment.RESCUE_DP_MD, Experiment.PEGASUS, Experiment.DSATWEVENT, Experiment.ADAPUB};
-        int[] mechanisms = all_mechanisms;
-        double[] epsilons = {0.1, 0.3, 0.5, 0.7, 0.9, 1.0};
-        int w = 120;
-        double epsilon = 1.0;
-        int[] w_s = {40, 80, 120, 160, 200};
-        int num_iterations = 100;
         
         for (int period_length : pLen) {
             Generator gen = new Generator(streamLength, period_length, basis);
@@ -259,16 +287,19 @@ public class OutlierStream {
                     
                     OutlierStream plateaus = new OutlierStream(data_set, PLATEAU_OUTLIER);
                     System.out.println(plateaus);
+                    write_non_private_stream(plateaus, data_set_identifier+"_plateaus");
                     create_sanitized_streams_vary_e(mechanisms, plateaus, data_set_identifier+"_plateaus", epsilons, num_iterations, w);
                     create_sanitized_streams_vary_w(mechanisms, plateaus, data_set_identifier+"_plateaus", epsilon, num_iterations, w_s);
                     
                     OutlierStream extrema = new OutlierStream(data_set, EXTREMUM_OUTLIER);
                     System.out.println(extrema);
+                    write_non_private_stream(extrema, data_set_identifier+"_extrema");
                     create_sanitized_streams_vary_e(mechanisms, plateaus, data_set_identifier+"_extrema", epsilons, num_iterations, w);
                     create_sanitized_streams_vary_w(mechanisms, plateaus, data_set_identifier+"_extrema", epsilon, num_iterations, w_s);
                     
                     OutlierStream pattern_extensions = new OutlierStream(data_set, PATTERN_EXTENSION_OUTLIER);
                     System.out.println(pattern_extensions);
+                    write_non_private_stream(pattern_extensions, data_set_identifier+"_pattern");
                     create_sanitized_streams_vary_e(mechanisms, plateaus, data_set_identifier+"_pattern", epsilons, num_iterations, w);
                     create_sanitized_streams_vary_w(mechanisms, plateaus, data_set_identifier+"_pattern", epsilon, num_iterations, w_s);
                     
@@ -279,16 +310,23 @@ public class OutlierStream {
         }   
 	}
 	
-	public static String out_tsv(ArrayList<double[]> stream) {
+	static void write_non_private_stream(OutlierStream stream, String data_set) {
+        if(OUTPUT_MODE == OUTPUT_MODE_FILE) {
+        	to_file(stream.outlier_stream, "/org-" + data_set +".csv", stream.outlier_score);	
+        }else{
+        	System.out.println(out_tsv(stream.outlier_stream));
+        } 
+	}
+
+	static String out_tsv(ArrayList<double[]> stream) {
 		if(stream.get(0).length!=1) return "out_tsv(ArrayList<double[]>) No 1D Stream";
-		String ret = "Stream\n";
+		String ret = "Stream\t";
 		for(double[] ts : stream) {
 			ret+=ts[0]+"\t";
 		}
 		return ret;
 	}
 	
-	public static String CSV_DIR = "./csv";
     static void create_sanitized_streams_vary_e(int[] mechanisms, OutlierStream stream, String data_set, double[] epsilons, int num_iterations, int w) {
         System.out.println("w-event Experimentator for Outlier Stream testing for mechanisms " + Arrays.toString(mechanisms) + " e in " + Arrays.toString(epsilons) + " and w = " + w);
         double start = System.currentTimeMillis();
@@ -309,15 +347,11 @@ public class OutlierStream {
                 m.epsilon = eps;
                 for (int loop = 0; loop < num_iterations; loop++) {
                     ArrayList<double[]> sanStream = m.run(stream.outlier_stream, w, eps);
-                    try {
-                        FileWriter file = new FileWriter(CSV_DIR + "/eps-" + data_set + "-" + m.name().replaceAll("\\s", "").replaceAll("_", "") + "-"+loop+".csv");
-                        BufferedWriter bufferedWriter = new BufferedWriter(file);
-                        String file_content = to_file_output_string(sanStream, stream.outlier_score);
-                        bufferedWriter.append(file_content);
-                        bufferedWriter.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }     
+                    if(OUTPUT_MODE == OUTPUT_MODE_FILE) {
+                    	to_file(sanStream, "/eps-" + data_set + "-" + m.name().replaceAll("\\s", "").replaceAll("_", "") + "-"+loop+".csv", stream.outlier_score);	
+                    }else{
+                    	System.out.println(out_tsv(sanStream));
+                    }
                     LaplaceStream.line();
                 }
             }  
@@ -335,6 +369,18 @@ public class OutlierStream {
 
         System.out.println("Data=" + data_set + " with dim=" + stream.outlier_stream.get(0).length + " length=" + stream.outlier_stream.size());
     }
+    static void to_file(ArrayList<double[]> sanStream, String file_name, double[] outlier_score){
+    	try {
+            FileWriter file = new FileWriter(CSV_DIR + file_name);
+            BufferedWriter bufferedWriter = new BufferedWriter(file);
+            String file_content = to_file_output_string(sanStream, outlier_score);
+            bufferedWriter.append(file_content);
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     static void create_sanitized_streams_vary_w(int[] mechanisms, OutlierStream stream, String data_set, double epsilon, int num_iterations, int[] ws) {
         System.out.println("w-event Experimentator for Outlier Stream testing for mechanisms " + Arrays.toString(mechanisms) + " w in " + Arrays.toString(ws) + " and e = " + epsilon);
         double start = System.currentTimeMillis();
@@ -356,15 +402,11 @@ public class OutlierStream {
                 m.epsilon = eps;
                 for (int loop = 0; loop < num_iterations; loop++) {
                     ArrayList<double[]> sanStream = m.run(stream.outlier_stream, w, eps);
-                    try {
-                        FileWriter file = new FileWriter(CSV_DIR + "/w-" + data_set + "-" + m.name().replaceAll("\\s", "").replaceAll("_", "") + "-"+loop+".csv");
-                        BufferedWriter bufferedWriter = new BufferedWriter(file);
-                        String file_content = to_file_output_string(sanStream, stream.outlier_score);
-                        bufferedWriter.append(file_content);
-                        bufferedWriter.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }     
+                    if(OUTPUT_MODE == OUTPUT_MODE_FILE) {
+                    	to_file(sanStream, "/w-" + data_set + "-" + m.name().replaceAll("\\s", "").replaceAll("_", "") + "-"+loop+".csv", stream.outlier_score);	
+                    }else{
+                    	System.out.println(out_tsv(sanStream));
+                    }
                     LaplaceStream.line();
                 }
             }  
@@ -434,17 +476,26 @@ public class OutlierStream {
 			before = counts.get(i-1).my_time;
 			now = counts.get(i).my_time;
 			if(!before.plusMinutes(5).equals(now)) {
-				System.err.println(before+" mintues != "+now);
+				System.err.println(before+" minutes != "+now);
 			}
 		}*/
 		int num_timestamps_to_aggregate = 12;
 		counts = aggregate(counts,num_timestamps_to_aggregate);
-		for(Count c : counts) {
+		/*for(Count c : counts) {
 			System.out.println(c);		
-		}
+		}*/
+		
+		OutlierStream my_stream = new OutlierStream(counts);
+		System.out.println(my_stream);
+		String data_set_name = "dodgers";
+		write_non_private_stream(my_stream, data_set_name);
+		
+		//Create the sanitized releases
+		create_sanitized_streams_vary_e(mechanisms, my_stream, data_set_name, epsilons, num_iterations, w);
+        create_sanitized_streams_vary_w(mechanisms, my_stream, data_set_name, epsilon, num_iterations, w_s);
     }
 
-	private static ArrayList<Count> aggregate(ArrayList<Count> counts, int num_timestamps_to_aggregate) {
+	static ArrayList<Count> aggregate(ArrayList<Count> counts, int num_timestamps_to_aggregate) {
 		ArrayList<Count> ret = new ArrayList<Count>(counts.size()/num_timestamps_to_aggregate+1);
 		for(int i=0;i<counts.size();) {
 			//group
@@ -462,7 +513,7 @@ public class OutlierStream {
 		return ret;
 	}
 
-	private static void label_outlier(ArrayList<Count> counts, ArrayList<Event> events) {
+	static void label_outlier(ArrayList<Count> counts, ArrayList<Event> events) {
 		final int size_counts = counts.size();
 		int i_counts=0;
 		int i_events=0;
