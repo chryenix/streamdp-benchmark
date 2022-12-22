@@ -30,7 +30,7 @@ public class OutlierStream {
 	public static String CSV_DIR = "./csv";
 	static final int OUTPUT_MODE_CONSOLE = 0;
 	static final int OUTPUT_MODE_FILE = 1;
-	static int OUTPUT_MODE = OUTPUT_MODE_CONSOLE; 
+	static int OUTPUT_MODE = OUTPUT_MODE_FILE; 
 	
     //Experiment related stuff
 	static int[] mechanisms; 
@@ -64,7 +64,7 @@ public class OutlierStream {
 	 */
 	double q_max;
 	//TODO make configurable
-	int expected_season_length = 80;
+	static int expected_season_length = 80;
 	
 	public OutlierStream(final ArrayList<Count> stream) {
 		this.stream_dimensionality = 1;//By definition of the Count class
@@ -265,13 +265,13 @@ public class OutlierStream {
 	
 	public static void main(String[] arg){
 		generate_artificial_outlier_streams();
-		//load_dodgers_dataset();
+		load_dodgers_dataset();
 	}
 	
-	static void generate_artificial_outlier_streams() {
+	public static void generate_artificial_outlier_streams() {
         int[] desriredStreamMaxValues = {1000};
         double basis = 1.2;//TODO 1.3?
-        int[] pLen = {80};
+        int[] pLen = {expected_season_length};
         int streamLength = 1000;
         int num_iterations_per_Mechanism = 1;
         int num_iterations_per_dataParameterCombi = 1;
@@ -309,7 +309,11 @@ public class OutlierStream {
             }
         }   
 	}
-	
+	/**
+	 * For comparison, we also create an output for the original non-private outlier streams
+	 * @param stream
+	 * @param data_set
+	 */
 	static void write_non_private_stream(OutlierStream stream, String data_set) {
         if(OUTPUT_MODE == OUTPUT_MODE_FILE) {
         	to_file(stream.outlier_stream, "/org-" + data_set +".csv", stream.outlier_score);	
@@ -317,7 +321,11 @@ public class OutlierStream {
         	System.out.println(out_tsv(stream.outlier_stream));
         } 
 	}
-
+	/**
+	 * For outputting our streams to console.
+	 * @param stream
+	 * @return
+	 */
 	static String out_tsv(ArrayList<double[]> stream) {
 		if(stream.get(0).length!=1) return "out_tsv(ArrayList<double[]>) No 1D Stream";
 		String ret = "Stream\t";
@@ -327,6 +335,15 @@ public class OutlierStream {
 		return ret;
 	}
 	
+	/**
+	 * Creates and outputs the sanitized release stream for the all combinations of the vary-epsilon experiment
+	 * @param mechanisms
+	 * @param stream
+	 * @param data_set
+	 * @param epsilons
+	 * @param num_iterations
+	 * @param w
+	 */
     static void create_sanitized_streams_vary_e(int[] mechanisms, OutlierStream stream, String data_set, double[] epsilons, int num_iterations, int w) {
         System.out.println("w-event Experimentator for Outlier Stream testing for mechanisms " + Arrays.toString(mechanisms) + " e in " + Arrays.toString(epsilons) + " and w = " + w);
         double start = System.currentTimeMillis();
@@ -369,6 +386,12 @@ public class OutlierStream {
 
         System.out.println("Data=" + data_set + " with dim=" + stream.outlier_stream.get(0).length + " length=" + stream.outlier_stream.size());
     }
+    /**
+     * Creates a CSV file having the expected format of the outlier detection framework
+     * @param sanStream
+     * @param file_name
+     * @param outlier_score
+     */
     static void to_file(ArrayList<double[]> sanStream, String file_name, double[] outlier_score){
     	try {
             FileWriter file = new FileWriter(CSV_DIR + file_name);
@@ -380,7 +403,15 @@ public class OutlierStream {
             e.printStackTrace();
         }
     }
-    
+	/**
+	 * Creates and outputs the sanitized release stream for the all combinations of the vary-w experiment
+	 * @param mechanisms
+	 * @param stream
+	 * @param data_set
+	 * @param epsilons
+	 * @param num_iterations
+	 * @param w
+	 */
     static void create_sanitized_streams_vary_w(int[] mechanisms, OutlierStream stream, String data_set, double epsilon, int num_iterations, int[] ws) {
         System.out.println("w-event Experimentator for Outlier Stream testing for mechanisms " + Arrays.toString(mechanisms) + " w in " + Arrays.toString(ws) + " and e = " + epsilon);
         double start = System.currentTimeMillis();
@@ -432,7 +463,7 @@ public class OutlierStream {
      * Download file at https://archive.ics.uci.edu/ml/datasets/Dodgers+Loop+Sensor
      * @param file_location
      */
-    static void load_dodgers_dataset() {
+    public static void load_dodgers_dataset() {
     	//(1) Process .event file
     	ArrayList<Event> events = new ArrayList<Event>();
 		BufferedReader br;
@@ -495,6 +526,13 @@ public class OutlierStream {
         create_sanitized_streams_vary_w(mechanisms, my_stream, data_set_name, epsilon, num_iterations, w_s);
     }
 
+    /**
+     * Used to change the temporal resolution of a COUNT-Object stream, e.g., for the Dodgers stream.
+     * Note, upon aggregation a time stamp is labeled outlier if input timestamps contain at least one outlier timestamp, i.e., outliers are dominant.
+     * @param counts
+     * @param num_timestamps_to_aggregate
+     * @return
+     */
 	static ArrayList<Count> aggregate(ArrayList<Count> counts, int num_timestamps_to_aggregate) {
 		ArrayList<Count> ret = new ArrayList<Count>(counts.size()/num_timestamps_to_aggregate+1);
 		for(int i=0;i<counts.size();) {
@@ -512,7 +550,11 @@ public class OutlierStream {
 		
 		return ret;
 	}
-
+	/**
+	 * The Dodgers stream has one file for for the data (.data) and another one for the outlier events. This method maps them together, s.t. there is a COUNT object for every timestamp.
+	 * @param counts
+	 * @param events
+	 */
 	static void label_outlier(ArrayList<Count> counts, ArrayList<Event> events) {
 		final int size_counts = counts.size();
 		int i_counts=0;
