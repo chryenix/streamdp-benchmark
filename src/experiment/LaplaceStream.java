@@ -8,6 +8,19 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * This is the class that generates random Laplace numbers. We use it for adding the right amount of noise to achieve differential privacy.
+ * 
+ * The class generates a stream of Laplace numbers following the the zero mean Laplace distribution with shape parameter \lambda=1. There, are three ways to generate the stream steered with the USAGE_MODE parameter:
+ * (1) USAGE_MODE_RANDOM - This is what you want to conduct real experiments.
+ * (2) USAGE_MODE_STUPID - This means that we always return \lambda, i.e., the expected amount of noise. It is supposed for debugging. The name shall indicate that you should use it for experiments.
+ * (3) USAGE_MODE_PRECOMPUTED - This may additionally help for debugging.
+ * 
+ * Technically, the stream contains numbers for Lap(0,1), and we need stretch them (not here) to be conform with Lap(0,\lambda), e.g., when adding noise.
+ * 
+ * @author Martin
+ *
+ */
 public class LaplaceStream {
 	static LaplaceStream instance = null;
 	
@@ -15,6 +28,10 @@ public class LaplaceStream {
 	int dim;
 	int counter = 0;
 	int current_line = 0;
+	/**
+	 * my_numbers[i] refers to one stream. We cycle through them
+	 * my_numbers[i][dim] refers to a specific Laplace random number.
+	 */
 	double[][] my_numbers;
 	
 	public static int USAGE_MODE_RANDOM 		= 0;
@@ -27,6 +44,9 @@ public class LaplaceStream {
 	}
 	static cern.jet.random.engine.RandomEngine generator;
 
+	/**
+	 * The class is designed to be a singleton. I.e., there is one stream.
+	 */
 	private LaplaceStream(){
 		System.out.print("Loading random numbers with mode "+ USAGE_MODE);
 		if(USAGE_MODE==USAGE_MODE_RANDOM){
@@ -39,7 +59,7 @@ public class LaplaceStream {
 				my_numbers[0][i]=d;
 			}
 		}else if(USAGE_MODE==USAGE_MODE_PRECOMPUTED){
-			File randomNumbersFile = new File(".\\data\\laplace_numbers_per_mechanism_100_iterations.csv");
+			File randomNumbersFile = new File(".\\data\\laplace_numbers_per_mechanism_100_iterations.csv");//The file location
 
 	        try {
 	            if (randomNumbersFile.exists()) {
@@ -78,12 +98,6 @@ public class LaplaceStream {
 		
 	}
 	
-	/*public static boolean changeUsageMode(int mode){
-		LaplaceStream.USAGE_MODE = mode;
-		instance = new LaplaceStream();
-		return true;
-	}*/
-	
 	public static boolean line(){
 		if(USAGE_MODE==USAGE_MODE_PRECOMPUTED){
 			instance.current_line++;
@@ -95,6 +109,9 @@ public class LaplaceStream {
 		}
 	}
 	
+	/**
+	 * Returns some number from Lap(0,1)
+	 */
 	public static double nextNumber(){
 		if(USAGE_MODE==USAGE_MODE_STUPID){
 			return 1.0d;
@@ -102,7 +119,7 @@ public class LaplaceStream {
 		
 		double num = instance.my_numbers[instance.current_line][instance.counter++];
 		
-		instance.counter = (instance.counter==instance.size) ? 0 : instance.counter;
+		instance.counter = (instance.counter==instance.size) ? 0 : instance.counter;//Start at the front, if you reached the end of the stream.
 		return num;
 	}
 	

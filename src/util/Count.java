@@ -6,7 +6,8 @@ import java.time.format.DateTimeFormatter;
 import datagenerator.OutlierStream;
 
 /**
- * Count of Dodgers .data file 
+ * Count of Dodgers .data file
+ * Extracts the desired info of one line (i.e., time stamp) of the file. 
  * @author b1074672
  *
  */

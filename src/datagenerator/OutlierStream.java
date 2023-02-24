@@ -16,17 +16,27 @@ import mechanisms.*;
 
 import util.*;
 
+/**
+ * This is an extension of the data generator (i.e., Generator class). 
+ * It is used to inject outliers into streams, load real-world outlier streams and run the common experiments.
+ * 
+ * @author Martin
+ *
+ */
 public class OutlierStream {
+	//Enums for outlier types
 	public static final int PLATEAU_OUTLIER 		  = 0;
 	public static final int EXTREMUM_OUTLIER 		  = 1;
 	public static final int PATTERN_EXTENSION_OUTLIER = 2;
 	public static final int REAL_WORLD_OUTLIER 		  = 3;
 	
+	//Labels for ground truth
 	public static final double IS_OUTLIER = 1.0d;
 	public static final double NO_OUTLIER = 0.0d;
 	
 	private static Random rand = new Random(12345);
 	
+	//Path to real-world data
 	public static String CSV_DIR = "./csv";
 	static final int OUTPUT_MODE_CONSOLE = 0;
 	static final int OUTPUT_MODE_FILE = 1;
@@ -40,24 +50,33 @@ public class OutlierStream {
 	static int[] w_s; 
 	static int num_iterations;
 	
-	static {//config
+	static {//config TODO refactor me to real config
         //Experiment related stuff
         int[] all_mechanisms = {Experiment.KalmanFilterPID_FAST_w, Experiment.UNIFROM, Experiment.SAMPLE, Experiment.BD, Experiment.BA, Experiment.RESCUE_DP_MD, Experiment.PEGASUS, Experiment.DSATWEVENT, Experiment.ADAPUB};
-        int[] some_mechanisms = {Experiment.UNIFROM};
-        mechanisms = some_mechanisms;
+        //int[] some_mechanisms = {Experiment.UNIFROM};
+        mechanisms = all_mechanisms;
         double[] temp = {0.1, 0.3, 0.5, 0.7, 0.9, 1.0}; 
         epsilons = temp;
-        w = 40;
+        w = 2;//was 40 until 06.01., was 8 until 20.01.
         epsilon = 1.0;
         //int[] temp_2 = {40, 80, 120, 160, 200};
         int[] temp_2 = {1, 2, 4, 8, 16, 32};
         w_s = temp_2;
-        num_iterations = 100;
+        num_iterations = 10;
 	}
 	
+	/**
+	 * This is the class member that carries the data of a stream with outliers. it is in line with our common interface of stream being an ArrayList<double[]>
+	 */
 	public final ArrayList<double[]> outlier_stream;
 	private final int stream_dimensionality;
+	/**
+	 * outlier_score[t] refers to the outlier score at time stamp t. It should be in [0,1] i.e., in [NO_OUTLIER,IS_OUTLIER]. Conceptually, it can be some floating point.
+	 */
 	double[] outlier_score;
+	/**
+	 * Outlier type e.g., OutlierStream.PLATEAU_OUTLIER
+	 */
 	final int outlier_type;
 	/**
 	 * Maximum query result in the sub stream.
@@ -66,6 +85,12 @@ public class OutlierStream {
 	//TODO make configurable
 	static int expected_season_length = 80;
 	
+	/**
+	 * Constructor for real-world data not following our API, i.e., stream is no ArrayList<double[]>
+	 * Here, we assume that the outliers are already in the data.
+	 * 
+	 * @param stream
+	 */
 	public OutlierStream(final ArrayList<Count> stream) {
 		this.stream_dimensionality = 1;//By definition of the Count class
 		if(stream_dimensionality!=1) {
@@ -82,18 +107,24 @@ public class OutlierStream {
 		}
 	}
 	
+	/**
+	 * Constructor in line with our common interface. We place outliers according to given outlier_type Enum
+	 * 
+	 * @param org_generated_stream
+	 * @param outlier_type
+	 */
 	public OutlierStream(final ArrayList<double[]> org_generated_stream, final int outlier_type) {
-		this.outlier_score 			= new double[org_generated_stream.size()];//init with 0
+		this.outlier_score 			= new double[org_generated_stream.size()];//init with 0, i.e., NO_OUTLIER
 		this.outlier_type 			= outlier_type;
-		this.stream_dimensionality = org_generated_stream.get(0).length;
+		this.stream_dimensionality  = org_generated_stream.get(0).length;
 		if(stream_dimensionality!=1) {
-			System.err.println("OutlierStream: stream_dimensionality!=1");
+			System.err.println("OutlierStream: stream_dimensionality!=1");//Usually, we use 1D streams
 		}
 		
 		q_max = get_max(org_generated_stream);
-		outlier_stream = new ArrayList<double[]>(org_generated_stream.size());
+		outlier_stream = new ArrayList<double[]>(org_generated_stream.size());//prepare empty stream
 		for(double[] d : org_generated_stream) {
-			outlier_stream.add(d.clone());
+			outlier_stream.add(d.clone()); //Note, we do not modify the original stream (without outliers)
 		}
 		
 		//Place outlier based on type
@@ -109,8 +140,8 @@ public class OutlierStream {
 	}
 	
     void place_plateaus() {
-     	final double plateau_threshold = 0.1*q_max;//make class member
-     	double p = 0.3;//XXX
+     	final double plateau_threshold = 0.1*q_max;//max query value in a plateau outlier
+     	double p = 0.3;//XXX - hard coded probability of season to contain a plateau outlier
      	
     	for(int season_start = 0;season_start<outlier_stream.size();) {
     		//dice in [0,1]
@@ -123,7 +154,7 @@ public class OutlierStream {
     				for(int dim=0;dim<time_stamp_data.length;dim++) {//usually multidimensional release per time stamp. Cut them all
     					if(time_stamp_data[dim]>plateau_threshold) {
     						time_stamp_data[dim] = plateau_threshold;//Implicit min(plateau_threshold,time_stamp_data[dim])
-    						outlier_score[t]   = IS_OUTLIER;
+    						outlier_score[t] = IS_OUTLIER;
     					}
     				}
     			}
@@ -139,7 +170,7 @@ public class OutlierStream {
     	int random_ts = expected_season_length+rand.nextInt(outlier_stream.size()-2*expected_season_length);//dice some random time stamp. Not in the first or last season.
     	//find the peaks to the left and right
     	
-    	//to the left
+    	//find season peak to the left
     	int max_t_left = -1;
     	double max_val_left = Double.MIN_VALUE;
     	for(int t=random_ts-expected_season_length;t<random_ts;t++) {
@@ -149,7 +180,7 @@ public class OutlierStream {
     			max_t_left = t;
     		}
     	}
-    	//to the right
+    	//find season peak to the right
     	int max_t_right = -1;
     	double max_val_right = Double.MIN_VALUE;
     	for(int t=random_ts;t<=random_ts+expected_season_length;t++) {
@@ -170,12 +201,12 @@ public class OutlierStream {
 			}
     	}
     	//Really place the outlier
-    	final int num_outlier_ts = expected_season_length / 4;//TODO make config parameter
+    	final int num_outlier_ts = expected_season_length / 4;// XXX - hard coded length of the pattern extension anomaly
     	final int dim = outlier_stream.get(min_t).length;
     	
     	for(int i=0;i<num_outlier_ts;i++) {
     		double[] new_ts = new double[dim];
-    		Arrays.fill(new_ts, Math.max(0, min+rand.nextGaussian()));//N(0,1) 
+    		Arrays.fill(new_ts, Math.max(0, min+rand.nextGaussian()));// min query value with some random noise from N(0,1) 
     		outlier_stream.add(min_t,new_ts);//Inserts the specified element at the specified position in this list. Shifts the element currently at that position (if any) and any subsequent elements to the right (adds one to their indices).
     	}
     	//the size of the stream prefix changed. Need to change the outlier score array as well
@@ -187,16 +218,16 @@ public class OutlierStream {
     
     //TODO shall we bound the maximum number of extrema?
     void place_extrema() {
-    	double p = 0.01;//XXX
-    	double multiplier = 1.5;//TODO make class member
-     	final double extremum_value = multiplier*q_max;//make class member
+    	double p = 0.01;			//hard coded probability of a time stamp to become an outlier 
+    	double multiplier = 1.5;	//TODO make class member - Used to compute the query value of an extremum anomaly
+     	final double extremum_value = multiplier*q_max;
     	
     	for(int t = 0;t<outlier_stream.size();t++) {
     		//dice in [0,1]
     		double dice = rand.nextDouble();
     		if(dice<=p) {
     			//we place an outlier
-    			outlier_stream.get(t)[0] = extremum_value;
+    			outlier_stream.get(t)[0] = extremum_value;//only modify the release of the first dimension
     			outlier_score[t] 	     = IS_OUTLIER;
     		}
     	}
@@ -214,7 +245,7 @@ public class OutlierStream {
 	
 	/**
 	 * Tested only for 1D streams. Jump to a position close to the season maximum. Finds the minimum between to season peaks
-	 * TOOD vlt einfach im Generator merken?
+	 * TOOD maybe store upon generation?
 	 * 
 	 * @param season_start
 	 * @param expexted_season_length
@@ -263,6 +294,11 @@ public class OutlierStream {
 		return to_file_output_string(outlier_stream, outlier_score);
 	}
 	
+	/**
+	 * This methods illustrates how to start vary-e and vary-\epsilon experiments. The output are the files, which are then given to the outlier detection framework of
+	 * https://hpi-information-systems.github.io/timeeval-evaluation-paper/ 
+	 * @param arg
+	 */
 	public static void main(String[] arg){
 		generate_artificial_outlier_streams();
 		load_dodgers_dataset();
@@ -281,6 +317,7 @@ public class OutlierStream {
             StreamScalerAndStretcher s = new StreamScalerAndStretcher(gen, num_iterations_per_Mechanism);
             for (int desired_max_value : desriredStreamMaxValues) {
                 for (int i = 0; i < num_iterations_per_dataParameterCombi; i++) {
+                	//Create stream without anomalies
                     ArrayList<double[]> data_set = s.get_stream(i, desired_max_value, 1);
                     String data_set_identifier = "period_length" + period_length + "_a" + desired_max_value + "_iter" + i;
                     System.out.println(out_tsv(data_set));
@@ -365,7 +402,7 @@ public class OutlierStream {
                 for (int loop = 0; loop < num_iterations; loop++) {
                     ArrayList<double[]> sanStream = m.run(stream.outlier_stream, w, eps);
                     if(OUTPUT_MODE == OUTPUT_MODE_FILE) {
-                    	to_file(sanStream, "/eps-" + data_set + "-" + m.name().replaceAll("\\s", "").replaceAll("_", "") + "-"+loop+".csv", stream.outlier_score);	
+                    	to_file(sanStream, "/eps="+eps+"-" + data_set + "-" + m.name().replaceAll("\\s", "").replaceAll("_", "") + "-"+loop+".csv", stream.outlier_score);	
                     }else{
                     	System.out.println(out_tsv(sanStream));
                     }
@@ -403,6 +440,7 @@ public class OutlierStream {
             e.printStackTrace();
         }
     }
+    static boolean create_w_experiments = false; 
 	/**
 	 * Creates and outputs the sanitized release stream for the all combinations of the vary-w experiment
 	 * @param mechanisms
@@ -413,6 +451,7 @@ public class OutlierStream {
 	 * @param w
 	 */
     static void create_sanitized_streams_vary_w(int[] mechanisms, OutlierStream stream, String data_set, double epsilon, int num_iterations, int[] ws) {
+    	if(!create_w_experiments) return;
         System.out.println("w-event Experimentator for Outlier Stream testing for mechanisms " + Arrays.toString(mechanisms) + " w in " + Arrays.toString(ws) + " and e = " + epsilon);
         double start = System.currentTimeMillis();
         Arrays.sort(mechanisms);
@@ -434,7 +473,7 @@ public class OutlierStream {
                 for (int loop = 0; loop < num_iterations; loop++) {
                     ArrayList<double[]> sanStream = m.run(stream.outlier_stream, w, eps);
                     if(OUTPUT_MODE == OUTPUT_MODE_FILE) {
-                    	to_file(sanStream, "/w-" + data_set + "-" + m.name().replaceAll("\\s", "").replaceAll("_", "") + "-"+loop+".csv", stream.outlier_score);	
+                    	to_file(sanStream, "/w="+w+"-" + data_set + "-" + m.name().replaceAll("\\s", "").replaceAll("_", "") + "-"+loop+".csv", stream.outlier_score);	
                     }else{
                     	System.out.println(out_tsv(sanStream));
                     }
@@ -518,7 +557,7 @@ public class OutlierStream {
 		
 		OutlierStream my_stream = new OutlierStream(counts);
 		System.out.println(my_stream);
-		String data_set_name = "dodgers";
+		String data_set_name = "dodgers-"+num_timestamps_to_aggregate;
 		write_non_private_stream(my_stream, data_set_name);
 		
 		//Create the sanitized releases

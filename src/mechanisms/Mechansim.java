@@ -9,6 +9,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * All w-event mechanisms must extend from this class. It offers basic methods, our Experiment infrstructure relies on.
+ * 
+ *  
+ * @author Martin
+ *
+ */
 public abstract class Mechansim {
     private static final int DEFAULT_W = 10;
     private static final double DEFAULT_EPS = 1.0d;
@@ -54,10 +61,12 @@ public abstract class Mechansim {
         final int dim = org_stream_t.length;
         final double[] sanitized_stream_t = new double[dim];
         for (int d = 0; d < dim; d++) {
+        	//Because we assume that the dimensions are independent, we can add the noise independently to each dimension of the transcript. I.e., the dimensions do not share the budget.
             final double noise = LaplaceStream.nextNumber() * lambda;
             sanitized_stream_t[d] = org_stream_t[d] + noise;
         }
         if (TRUNCATE) {
+        	//Round query result to a non-negative number. Especially, if the stream is sparse (i.e., contains a lot of zero counts), this highly improves utility.
             for (int i = 0; i < sanitized_stream_t.length; i++) {
                 double temp = sanitized_stream_t[i];
                 temp = Math.max(0, temp);//allow no negative values
@@ -82,17 +91,26 @@ public abstract class Mechansim {
         double sanVal = val + noise;        
         
         if (TRUNCATE) {
-            sanVal = truncate(sanVal);//map to query domain;
+        	//Round query result to a non-negative number. Especially, if the stream is sparse (i.e., contains a lot of zero counts), this highly improves utility.
+            sanVal = truncate(sanVal);
         }
         return sanVal;
     }
 
+    /**
+     * Compute shape parameter \lambda for Lap(0,\lambda) for noise scaling using the provided budget \epsilon_t and query sensitivity \Delta Q
+     * 
+     * @param budget privacy budget \epsilon_t at current time stamp
+     * @param sensitivity query sensitivity \Delta Q. Usually it is 1.
+     * @return
+     */
     public static double lambda(double budget, double sensitivity) {
         return sensitivity / budget;
     }
 
     /**
      * Map to query domain \mathcal{N}
+     * Round query result to a non-negative number. Especially, if the stream is sparse (i.e., contains a lot of zero counts), this highly improves utility.
      *
      * @param val
      * @return
@@ -131,7 +149,7 @@ public abstract class Mechansim {
     }
 
     /**
-     * Average Relative Error (ARE)
+     * Average Relative Error (ARE) aka MRE
      *
      * @param org_values
      * @param new_values
@@ -441,7 +459,7 @@ public abstract class Mechansim {
 
     /**
      * This is the method that the Experiment class calls. Implement it for you own class. 
-     * For getting an intuition how to do that refer t the implementation of Uniform and Sample. 
+     * For getting an intuition how to do that refer to the implementation of Uniform and Sample. 
      * 
      * @param org_stream stream prefix org_stream.get(t) gives the n-dimensional original query result at time t
      * 

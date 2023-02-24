@@ -8,18 +8,24 @@ import mechanisms.*;
 import java.io.*;
 import java.util.*;
 
+/**
+ * This is the class that contains all the methods to start experiments, load data, and all enum to handle mechanisms etc.
+ * 
+ * @author Martin
+ *
+ */
 public class Experiment {
 
     // Data sets
-    public static final int WORLD_CUP = 0;
-    public static final int FLU_NUM_DEATH = 1;
-    public static final int STAT_FLU = 2;
+    public static final int WORLD_CUP 		= 0;
+    public static final int FLU_NUM_DEATH 	= 1;
+    public static final int STAT_FLU 		= 2;
     public static final int TDRIVE_EXTENDED = 3;
-    public static final int ENERGY_DATA = 4;
-    public static final int UNEMPLOY = 5;
+    public static final int ENERGY_DATA 	= 4;
+    public static final int UNEMPLOY 		= 5;
     public static final int FAST_FLU_OUTPATIENT_EXTENDED = 6;
-    public static final int WANG_TAXI_ECPK = 7;
-    public static final int ADAPUB_RETAIL = 8;
+    public static final int WANG_TAXI_ECPK 	= 7;
+    public static final int ADAPUB_RETAIL 	= 8;
     /**
      * Determines the used error measure
      */
@@ -29,18 +35,18 @@ public class Experiment {
      */
     public static final int ARE = 1;
     //Mechanisms
-    public static final int UNIFROM = 0;
-    public static final int SAMPLE = 1;
-    public static final int BD = 2;
-    public static final int BA = 3;
-    public static final int BD_BA_MIX = 4;
-    public static final int RESCUE_DP_MD = 5;
-    public static final int RESCUE_DP_1D = 6;
+    public static final int UNIFROM 	= 0;
+    public static final int SAMPLE 		= 1;
+    public static final int BD 			= 2;
+    public static final int BA 			= 3;
+    public static final int BD_BA_MIX 	= 4;
+    public static final int RESCUE_DP_MD= 5;
+    public static final int RESCUE_DP_1D= 6;
     public static final int BD_GROUPING = 7;
-    public static final int PEGASUS = 8;
-    public static final int DSATWEVENT = 9;
+    public static final int PEGASUS 	= 8;
+    public static final int DSATWEVENT 	= 9;
     public static final int KalmanFilterPID_FAST_w = 10;
-    public static final int ADAPUB = 11;
+    public static final int ADAPUB 		= 11;
 
     //public static final String[] FILE_NAMES = {"Wang_Taxi_ECMLPKDD_d=3750_len=672.csv","FAST_Flu_Outpatient[5-24]_seasons06-10_d=1_len=209.csv","FAST_unemploy_black_women_[16-19]_d=1_len=478.csv","wc_kellaris_data1320","Flu_NumInfDeath[18-64]_seasons12-19_d=1_len=374.csv","StatFlu_infLikeIllness_d=51_len=492.csv","DSAT_Taxi_TDrive_d=100_len=169.csv","GEFComDay"};
 
@@ -52,18 +58,21 @@ public class Experiment {
     static final String FAST_UNEMPLOY_DATA_SET = ".\\data\\FAST_unemploy_black_women_[16-19]_d=1_len=478.csv";
     static final String WANG_TAXI_ECPK_DATA_SET = ".\\data\\Wang_Taxi_ECMLPKDD_d=3750_len=672.csv";
     // unkown where used
-    static final String INFLUENZA_NUM_DEATH_DATA_SET = ".\\data\\Flu_NumInfDeath[18-64]_seasons12-19_d=1_len=374.csv";
-    private static final String ONLINE_RETAIL_DATA = ".\\data\\AdaPub-OnlineRetail-l=374_d=1289.csv";
+    static final String INFLUENZA_NUM_DEATH_DATA_SET 	= ".\\data\\Flu_NumInfDeath[18-64]_seasons12-19_d=1_len=374.csv";
+    private static final String ONLINE_RETAIL_DATA 		= ".\\data\\AdaPub-OnlineRetail-l=374_d=1289.csv";
     
     public static String RESLT_DIR = "./results";
     /**
      * Determines the used error measure. Use MAE or ARE.
      */
     public static int ERROR_MEASURE = MAE;
+    /**
+     * Query sensitivity \Delta Q. It equals 1 for all count and histogram queries.
+     */
     static double sensitivity = 1.0d;
 
     public static void main(String[] args) {
-        boolean runRealWoldExperiments = false;
+        boolean runRealWoldExperiments = true;
         System.out.println("w-event Experimentator runRealWoldExperiments = " + runRealWoldExperiments);
         if (runRealWoldExperiments) {
             runRealWorldExperiments();
@@ -72,6 +81,11 @@ public class Experiment {
         }
     }
 
+    /**
+     * 
+     * @param mechanism e.g., Experiment.UNIFROM
+     * @return
+     */
     public static Mechansim getInstance(final int mechanism) {
         if (mechanism == UNIFROM) {
             return new Uniform();
@@ -103,6 +117,11 @@ public class Experiment {
         }
     }
 
+    /**
+     * 
+     * @param data e.g., Experiment.WORLD_CUP
+     * @return
+     */
     static ArrayList<double[]> load(final int data) {
         ArrayList<double[]> stream;
         if (data == WORLD_CUP) {
@@ -132,7 +151,7 @@ public class Experiment {
         for (double[] ts : stream) {
             totalSumOverTime += Arrays.stream(ts).sum();
         }
-        if (totalSumOverTime == 0) {
+        if (totalSumOverTime == 0) {//Sanity check
             System.err.println(data + " is empty!");
         }
         return stream;
@@ -375,8 +394,6 @@ public class Experiment {
                         } else {
                             //skip it
                             st.nextToken();
-
-
                         }
                     }
                     timestamp++;
@@ -534,6 +551,14 @@ public class Experiment {
         }
     }
 
+    /**
+     * Runs all provided mechanism for w in [start_w,stop_w) with increment of 1 on the given data set
+     * 
+     * @param mechanisms List of mechanism enums, e.g., [Experiment.UNIFROM, Experiment.SAMPLE]
+     * @param start_w
+     * @param stop_w
+     * @param data_set e.g., Experiment.WORLD_CUP
+     */
     static void runAll(int[] mechanisms, int start_w, int stop_w, int data_set) {
         System.out.println("w-event Experimentator for " + Arrays.toString(mechanisms));
         System.out.print("Load Data " + data_set);
@@ -564,12 +589,32 @@ public class Experiment {
         }
     }
 
+    /**
+     * Method to start vary-w experiments. The method intrinsically calls runAll_wHist2(int[] mechanisms, ArrayList<double[]> stream, String data_set, int[] w_s, int num_iterations, double eps, boolean printHist)
+     * 
+     * @param mechanisms
+     * @param data_set
+     * @param w_s
+     * @param num_iterations
+     * @param eps
+     * @param printHist
+     */
     static void runAll_wHist2(int[] mechanisms, int data_set, int[] w_s, int num_iterations, double eps, boolean printHist) {
         System.out.print("Load Data " + data_set + " ");
         ArrayList<double[]> stream = Experiment.load(data_set);
         runAll_wHist2(mechanisms, stream, String.valueOf(data_set), w_s, num_iterations, eps, printHist);
     }
 
+    /**
+     * Method to start vary-w experiments. 
+     * 
+     * @param mechanisms
+     * @param data_set
+     * @param w_s
+     * @param num_iterations
+     * @param eps
+     * @param printHist
+     */
     static void runAll_wHist2(int[] mechanisms, ArrayList<double[]> stream, String data_set, int[] w_s, int num_iterations, double eps, boolean printHist) {
         System.out.println("w-event Experimentator for " + Arrays.toString(mechanisms) + " w in " + Arrays.toString(w_s));
         double start = System.currentTimeMillis();
@@ -693,12 +738,33 @@ public class Experiment {
         System.out.println("Data=" + data_set + " with dim=" + stream.get(0).length + " length=" + stream.size());
     }
 
+    /**
+     * Method to start vary \epsilon experiments. It intrinsically calls runAll_eHist(int[] mechanisms, ArrayList<double[]> stream, String data_set, double[] epsilons, int num_iterations, int w, boolean writeHist)
+     * 
+     * @param mechanisms
+     * @param data_set
+     * @param epsilons
+     * @param num_iterations
+     * @param w
+     * @param writeHist
+     */
     static void runAll_eHist(int[] mechanisms, int data_set, double[] epsilons, int num_iterations, int w, boolean writeHist) {
         System.out.print("Load Data " + data_set + " ");
         ArrayList<double[]> stream = Experiment.load(data_set);
         runAll_eHist(mechanisms, stream, String.valueOf(data_set), epsilons, num_iterations, w, writeHist);
     }
 
+    /**
+     * Method to start \epsilon experiments.
+     * 
+     * @param mechanisms
+     * @param stream
+     * @param data_set
+     * @param epsilons
+     * @param num_iterations
+     * @param w
+     * @param writeHist
+     */
     static void runAll_eHist(int[] mechanisms, ArrayList<double[]> stream, String data_set, double[] epsilons, int num_iterations, int w, boolean writeHist) {
         System.out.println("w-event Experimentator for mechanisms " + Arrays.toString(mechanisms) + " e in " + Arrays.toString(epsilons) + " and w = " + w);
         double start = System.currentTimeMillis();
@@ -834,7 +900,7 @@ public class Experiment {
 
     public static void runArtificalExperiments() {
         double start = System.currentTimeMillis();
-        Mechansim.TRUNCATE = false;
+        Mechansim.TRUNCATE = false;// We recommend to always deactivate truncating for tests on artificial data
         RescueDP1D.USE_KALMAN_FILTER = true;
         LaplaceStream.USAGE_MODE = LaplaceStream.USAGE_MODE_RANDOM;
         int num_iterations_per_Mechanism = 100;
@@ -880,14 +946,14 @@ public class Experiment {
         final int[] data_sets_md = {STAT_FLU, TDRIVE_EXTENDED, ADAPUB_RETAIL, WORLD_CUP, WANG_TAXI_ECPK}; //WORLD_CUP, WANG_TAXI_ECPK,
 
 
-        final int[] data_sets = {FAST_FLU_OUTPATIENT_EXTENDED}; // data_sets_1d; //{ADAPUB_RETAIL}; //; {TDRIVE_EXTENDED}; //data_sets_1d; //  // { WORLD_CUP}; //data_sets_md; //data_sets_1d; //{FAST_FLU_OUTPATIENT_EXTENDED, UNEMPLOY, INFLUENZA_NUM_DEATH};
+        final int[] data_sets = data_sets_1d; //{ADAPUB_RETAIL}; //; {TDRIVE_EXTENDED}; //data_sets_1d; //  // { WORLD_CUP}; //data_sets_md; //data_sets_1d; //{FAST_FLU_OUTPATIENT_EXTENDED, UNEMPLOY, INFLUENZA_NUM_DEATH};
         for (int data_set : data_sets) {
 
             int[] all_mechanisms = {KalmanFilterPID_FAST_w, UNIFROM, SAMPLE, BD, BA, RESCUE_DP_MD, PEGASUS, DSATWEVENT, ADAPUB};
-            //int[] mechanisms = all_mechanisms;//
+            int[] mechanisms = all_mechanisms;//
             //int[] mechanisms =  all_mechanisms;
             //int[] mechanisms = {UNIFROM, BD, BD_GROUPING, BA, SAMPLE,KalmanFilterPID_FAST_w,  DSATWEVENT, ADAPUB};//PEGASUS, RESCUE_DP_MD,
-            int[] mechanisms = {UNIFROM, PEGASUS};
+            //int[] mechanisms = {UNIFROM, PEGASUS};
             //int[] mechanisms = all_mechanisms;
             //int[] mechanisms = {RESCUE_DP_1D, BD,BD};
             //int[] mechanisms = {UNIFROM,DSATUserLevel};
@@ -904,14 +970,11 @@ public class Experiment {
             /*LaplaceStream.USAGE_MODE = LaplaceStream.USAGE_MODE_STUPID;
             runAll_eHist(mechanisms, data_set, eps, 1, w, false);
             runAll_wHist2(mechanisms, data_set, w_s, 1, epsilon, false);*/
+            
             LaplaceStream.USAGE_MODE = LaplaceStream.USAGE_MODE_RANDOM;
-
             runAll_eHist(mechanisms, data_set, eps, num_iterations, w, true);
             runAll_wHist2(mechanisms, data_set, w_s, num_iterations, epsilon, true);
 
-            //final double[] eps = {0.1,0.3,0.5,0.7,0.9};
-            //final double[] eps = {1.0};
-            //runAll_e(mechanisms, data_set, eps, num_iterations);
             System.out.println("[DONE] Experimentor in " + (System.currentTimeMillis() - start) + " ms");
         }
     }

@@ -71,10 +71,10 @@ public final class MyArrayList {
 		Arrays.sort(ARRAY,0,writeHere);
 	}
 	
-	public void addAll(final int[] elf, final int start, final int stop) {
+	public void addAll(final int[] array, final int start, final int stop) {
 		final int length = stop-start;
 		ensureCapacity(length);
-		System.arraycopy(elf, start, this.ARRAY, 0, length);
+		System.arraycopy(array, start, this.ARRAY, 0, length);
 		this.writeHere = length;
 	}
 	
