@@ -72,7 +72,7 @@ public class Experiment {
     static double sensitivity = 1.0d;
 
     public static void main(String[] args) {
-        boolean runRealWoldExperiments = true;
+        boolean runRealWoldExperiments = false;
         System.out.println("w-event Experimentator runRealWoldExperiments = " + runRealWoldExperiments);
         if (runRealWoldExperiments) {
             runRealWorldExperiments();
@@ -372,8 +372,8 @@ public class Experiment {
     static void LoadWangTaxi(String filename, double[][] histogram, Collection<Integer> sampledDim) {
         File trajFile = new File(filename);
         int timestamp = 0;
-        System.out.println("Load Wang Taxi -- use " + sampledDim.size() + " dimensions");
-        System.out.println(Mechansim.outCSV(sampledDim));
+        //System.out.println("Load Wang Taxi -- use " + sampledDim.size() + " dimensions");
+        //System.out.println(Mechansim.outCSV(sampledDim));
         try {
             if (trajFile.exists()) {
                 BufferedReader inFile = new BufferedReader(new FileReader(trajFile));
@@ -944,10 +944,10 @@ public class Experiment {
         int num_iterations = 100;
         final int[] data_sets_1d = {FAST_FLU_OUTPATIENT_EXTENDED, UNEMPLOY, FLU_NUM_DEATH};
         final int[] data_sets_md = {STAT_FLU, TDRIVE_EXTENDED, ADAPUB_RETAIL, WORLD_CUP, WANG_TAXI_ECPK}; //WORLD_CUP, WANG_TAXI_ECPK,
+        final int[] all_data_sets= {FAST_FLU_OUTPATIENT_EXTENDED, UNEMPLOY, FLU_NUM_DEATH, STAT_FLU, TDRIVE_EXTENDED, ADAPUB_RETAIL, WORLD_CUP, WANG_TAXI_ECPK};
 
-
-        final int[] data_sets = data_sets_1d; //{ADAPUB_RETAIL}; //; {TDRIVE_EXTENDED}; //data_sets_1d; //  // { WORLD_CUP}; //data_sets_md; //data_sets_1d; //{FAST_FLU_OUTPATIENT_EXTENDED, UNEMPLOY, INFLUENZA_NUM_DEATH};
-        for (int data_set : data_sets) {
+        final int[] data_sets = all_data_sets; //{ADAPUB_RETAIL}; //; {TDRIVE_EXTENDED}; //data_sets_1d; //  // { WORLD_CUP}; //data_sets_md; //data_sets_1d; //{FAST_FLU_OUTPATIENT_EXTENDED, UNEMPLOY, INFLUENZA_NUM_DEATH};
+        for (int data_set : data_sets) {//FIXME all data sets
 
             int[] all_mechanisms = {KalmanFilterPID_FAST_w, UNIFROM, SAMPLE, BD, BA, RESCUE_DP_MD, PEGASUS, DSATWEVENT, ADAPUB};
             int[] mechanisms = all_mechanisms;//
