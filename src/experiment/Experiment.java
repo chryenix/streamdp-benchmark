@@ -526,7 +526,7 @@ public class Experiment {
 
     static void LoadRetailData(String filename, double[][] histogram) {
         File trajFile = new File(filename);
-        int counter = 0;
+        int line_number = 0;
         try {
             if (trajFile.exists()) {
                 BufferedReader inFile = new BufferedReader(new FileReader(trajFile));
@@ -535,12 +535,13 @@ public class Experiment {
                 while (line != null) {
                     java.util.StringTokenizer st = new java.util.StringTokenizer(line, ",");
                     st.nextToken(); // skip the date
-                    for (int i = 0; i < histogram.length; i++) {
-                        int c = Integer.parseInt(st.nextToken());
-                        histogram[i][counter] = (double) (c);
+                    double[] h_line = histogram[line_number];
+                    for (int column = 0; column < h_line.length; column++) {
+                        int value = Integer.parseInt(st.nextToken());
+                        h_line[column] = (double) (value);
                     }
-                    counter++;
                     line = inFile.readLine();
+                    line_number++;
                 }
                 inFile.close();
             } else {

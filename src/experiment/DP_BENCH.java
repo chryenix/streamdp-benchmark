@@ -1,5 +1,7 @@
 package experiment;
 
+import java.io.File;
+
 import datagenerator.OutlierStream;
 
 /**
@@ -23,18 +25,30 @@ public class DP_BENCH {
 			System.out.println("g: geneate sanitized streams for outlier detetion. Storing data under "+OutlierStream.CSV_DIR);
 		}
 		if(contains(args, "a")) {
+			File RESLT_DIR = new File(Experiment.RESLT_DIR);
+			if(!RESLT_DIR.exists()) {
+				RESLT_DIR.mkdir();
+			}
 			System.out.println("Running artificial experiments. Storing result data under "+Experiment.RESLT_DIR);
 			Experiment.runArtificalExperiments();
 		}
 		if(contains(args, "r")) {
+			File RESLT_DIR = new File(Experiment.RESLT_DIR);
+			if(!RESLT_DIR.exists()) {
+				RESLT_DIR.mkdir();
+			}
 			System.out.println("Running real-word-data experiments. Storing result data under "+Experiment.RESLT_DIR);
 			Experiment.runRealWorldExperiments();
 		}
 		if(contains(args, "p")) {
-			System.out.println("Creating aggregated results for Figures 2,3 and 5");
+			System.out.println("Creating aggregated results for Figures 2,3 and 5 and Table 6");
 			Eval.run();
 		}
 		if(contains(args, "g")) {
+			File CSV_DIR = new File(OutlierStream.CSV_DIR);
+			if(!CSV_DIR.exists()) {
+				CSV_DIR.mkdir();
+			}
 			System.out.println("Geneate sanitized streams for outlier detetion. Storing data under "+OutlierStream.CSV_DIR);
 			OutlierStream.main(null);
 		}

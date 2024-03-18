@@ -1,9 +1,11 @@
 package experiment;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +22,9 @@ import java.util.stream.Stream;
 
 public class Eval {
 	static final DecimalFormat df = new DecimalFormat("####.##", new DecimalFormatSymbols(Locale.US));
+	static final String figures_dir = "./figures";
+	static BufferedWriter output;
+	static final String new_line = "\n";
 	
 	static List<String> get_all_file_names(String dir){
 		File directory = new File(dir);
@@ -69,13 +74,22 @@ public class Eval {
 		
 		//create_and_print_fig_2a(all_results);
 		//create_and_print_fig_2b(all_results);
-		//create_and_print_fig_3(all_results);
-		//create_and_print_fig_5(all_results);
-		create_and_print_tab_6();
+		create_and_print_fig_3(all_results);
+		create_and_print_fig_5(all_results);
+		//create_and_print_tab_6();
+		//Eval.run();
 	}
 	
-	static void run() {
+	public static void run() {
 		List<String> all_results = get_all_file_names(Experiment.RESLT_DIR);
+		if(all_results.isEmpty()) {
+			System.err.println("Eval.run() - result dir is empty or does not exist at "+Experiment.RESLT_DIR);
+			return;
+		}
+		File figures = new File(figures_dir);
+		if(!figures.exists()) {
+			figures.mkdir();
+		}
 		
 		create_and_print_fig_2a(all_results);
 		create_and_print_fig_2b(all_results);
@@ -85,6 +99,7 @@ public class Eval {
 	}
 	
 	private static void create_and_print_tab_6() {
+		open_result_file("tab_6.tsv");
 		// TODO Auto-generated method stub
 		//Load all md data
 		final int[] data_sets_md = {
@@ -108,11 +123,11 @@ public class Eval {
 		}
 		
 		System.out.println("Printing Table 6");
-		System.out.println("Stream s\tdim\tLength p\tQuery result distribution");
-		System.out.println("\t\t\tq_min\tq_max\t90% quantile");
+		out("Stream s\tdim\tLength p\tQuery result distribution"+new_line);
+		out("\t\t\tq_min\tq_max\t90% quantile"+new_line);
 		for(int data_set=0;data_set<data_sets_md.length;data_set++) {
 			ArrayList<double[]> stream = streams.get(data_set);
-			System.out.print(data_set_names[data_set]+"\t"+stream.get(0).length+"\t"+stream.size()+"\t");
+			out(data_set_names[data_set]+"\t"+stream.get(0).length+"\t"+stream.size()+"\t");
 			ArrayList<Double> all_values = new ArrayList<Double>(stream.size()*stream.get(0).length);
 			for(double[] arr : stream) {
 				for(double d : arr) {
@@ -120,60 +135,63 @@ public class Eval {
 				}
 			}
 			Collections.sort(all_values);
-			System.out.print(all_values.get(0)+"\t");//min
-			System.out.print(all_values.get(all_values.size()-1)+"\t");//max
+			out(all_values.get(0)+"\t");//min
+			out(all_values.get(all_values.size()-1)+"\t");//max
 			double quantile_index = all_values.size();
 			quantile_index *= 0.9d;
-			System.out.println(all_values.get((int)quantile_index));
+			out(all_values.get((int)quantile_index)+new_line);
 		}
 		
-		//for each data set output dim etc.
+		close_result_file();
 	}
 
 	private static void create_and_print_fig_5(List<String> all_results) {
+		open_result_file("fig_5.tsv");
 		final int[] data_sets_md = {Experiment.STAT_FLU, Experiment.TDRIVE_EXTENDED, Experiment.ADAPUB_RETAIL, Experiment.WORLD_CUP, Experiment.WANG_TAXI_ECPK};
 		final String[] dataset_names = {"State Flu (51 dim.)", "TDrive (100 dim.)", "Retail (1,289 dim.)", "World Cup (1,289 dim.)", "Taxi Porto (1,289 dim.)"};
 		
-		System.out.println("Fig 5 (a)");
+		out("Fig 5 (a)"+new_line);
 		for(int i=0;i<data_sets_md.length;i++) {
-			System.out.println(dataset_names[i]);	
+			out(dataset_names[i]+new_line);	
 			print_all_mechanism_w_results_one_file(all_results, data_sets_md[i]);
-			System.out.println();
+			out(new_line);
 		}
 		
-		System.out.println("Fig 5 (b)");
+		out("Fig 5 (b)"+new_line);
 		for(int i=0;i<data_sets_md.length;i++) {
-			System.out.println(dataset_names[i]);	
+			out(dataset_names[i]+new_line);	
 			print_all_mechanism_e_results_one_file(all_results, data_sets_md[i]);
-			System.out.println();
+			out(new_line);
 		};
-		
+		close_result_file();
 	}
 	
 	private static void create_and_print_fig_3(List<String> all_results) {
+		open_result_file("fig_3.tsv");
 		final int[] data_sets_1d = {Experiment.FAST_FLU_OUTPATIENT_EXTENDED, Experiment.FLU_NUM_DEATH, Experiment.UNEMPLOY};
 		
-		System.out.println("Fig 3 (a)");
-		System.out.println("Flu Outpatient");
+		out("Fig 3 (a)"+new_line);
+		out("Flu Outpatient"+new_line);
 		print_all_mechanism_w_results_one_file(all_results, data_sets_1d[0]);
-		System.out.println();
-		System.out.println("Flu Death");
+		out(new_line);
+		out("Flu Death"+new_line);
 		print_all_mechanism_w_results_one_file(all_results, data_sets_1d[1]);
-		System.out.println();
-		System.out.println("Unemployment");
+		out(new_line);
+		out("Unemployment"+new_line);
 		print_all_mechanism_w_results_one_file(all_results, data_sets_1d[2]);
-		System.out.println();
+		out(new_line);
 		
-		System.out.println("Fig 3 (b)");
-		System.out.println("Flu Outpatient");
+		out("Fig 3 (b)"+new_line);
+		out("Flu Outpatient"+new_line);
 		print_all_mechanism_e_results_one_file(all_results, data_sets_1d[0]);
-		System.out.println();
-		System.out.println("Flu Death");
+		out(new_line);
+		out("Flu Death"+new_line);
 		print_all_mechanism_e_results_one_file(all_results, data_sets_1d[1]);
-		System.out.println();
-		System.out.println("Unemployment");
+		out(new_line);
+		out("Unemployment"+new_line);
 		print_all_mechanism_e_results_one_file(all_results, data_sets_1d[2]);
-		System.out.println();
+		out(new_line);
+		close_result_file();
 		
 	}
 	
@@ -190,9 +208,6 @@ public class Eval {
 	private static void print_all_mechanism_w_results_one_file(List<String> all_results, int file_num) {
 		String file_prefix = "w-0-"+file_num;
 		List<String> vary_e_results = get_files_starting_with(file_prefix, all_results);
-		for(String s : vary_e_results) {
-			//System.out.println(s);
-		}
 		
 		String[] mechanism_names = {"Uniform", "Sample", "Fast", "BD", "BA", "RescueDP", "PeGaSus", "AdaPub", "DSAT"};
 		for(String m : mechanism_names) {
@@ -200,7 +215,7 @@ public class Eval {
 				if(f.contains(m)) {
 					double[] results = get_aggregated_file_content(f);
 					//System.out.println(m);
-					System.out.println(m+"\t"+to_tsv(results));
+					out(m+"\t"+to_tsv(results)+new_line);
 				}
 			}
 		}
@@ -209,9 +224,6 @@ public class Eval {
 	private static void print_all_mechanism_e_results_one_file(List<String> all_results, int file_num) {
 		String file_prefix = "eps-0-"+file_num;
 		List<String> vary_e_results = get_files_starting_with(file_prefix, all_results);
-		for(String s : vary_e_results) {
-			//System.out.println(s);
-		}
 		
 		String[] mechanism_names = {"Uniform", "Sample", "Fast", "BD", "BA", "RescueDP", "PeGaSus", "AdaPub", "DSAT"};
 		for(String m : mechanism_names) {
@@ -219,7 +231,7 @@ public class Eval {
 				if(f.contains(m)) {
 					double[] results = get_aggregated_file_content(f);
 					//System.out.println(m);
-					System.out.println(m+"\t"+to_tsv(results));
+					out(m+"\t"+to_tsv(results)+new_line);
 				}
 			}
 		}
@@ -260,6 +272,7 @@ public class Eval {
 	}
 	
 	private static void create_and_print_fig_2b(List<String> all_results) {
+		open_result_file("fig_2b.tsv");
 		List<String> artificial_vary_w_results = get_artificial_vary_w_results(all_results);
 		for(String s : artificial_vary_w_results) {
 			//System.out.println(s);
@@ -336,13 +349,30 @@ public class Eval {
 			double[][][] results_line = {fast_results, pegasus_results, rescuedp_results};
 			out_delta_mae(min_mae,m,results_line);
 		}
+		close_result_file();
 	}
 
-	private static void create_and_print_fig_2a(List<String> all_results) {
-		List<String> artificial_vary_e_results = get_artificial_vary_e_results(all_results);
-		for(String s : artificial_vary_e_results) {
-			//System.out.println(s);
+	static void open_result_file(String figure_name) {
+		try {
+			output = new BufferedWriter(new FileWriter(figures_dir+File.separator+figure_name));
+		} catch (IOException e) {
+			output = null;
+			e.printStackTrace();
 		}
+	}
+	
+	static void close_result_file(){
+		try {
+			output.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	 
+	private static void create_and_print_fig_2a(List<String> all_results) {
+		open_result_file("fig_2a.tsv");
+		List<String> artificial_vary_e_results = get_artificial_vary_e_results(all_results);
+
 		String mechanism_name = "Uniform";
 		//Uniform
 		double[][] uniform_results = get_mechanism_results_e(mechanism_name,artificial_vary_e_results); 
@@ -415,6 +445,7 @@ public class Eval {
 			double[][][] results_line = {fast_results, pegasus_results, rescuedp_results};
 			out_delta_mae(min_mae,m,results_line);
 		}
+		close_result_file();
 	}
 
 	private static double[][] copy(double[][] arr) {
@@ -426,33 +457,42 @@ public class Eval {
 		}
 		return ret;
 	}
+	
+	static void out(String s){
+		System.out.print(s);
+		try {
+			output.write(s);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private static void out_delta_mae(double[][] min_mae, String[] mechanisms, double[][][] results_line) {
 		DecimalFormat df = new DecimalFormat("#,###.##", new DecimalFormatSymbols(Locale.US));
 		
-		System.out.print("\t");
+		out("\t"); 
 		for(String m : mechanisms) {
-			System.out.print(m+"\t\t\t\t\t");
+			out(m+"\t\t\t\t\t");
 		}
-		System.out.println();
+		out(new_line);
 		int num_mechs = results_line.length;
 		int num_lines = results_line[0].length;
 		int num_columns = results_line[0][0].length;
 		
 		String[] all_eps = {"0.1","0.3","0.5","0.7","0.9","1"};
 		
-		System.out.println("a/e\t10\t100\t1000\t10000\t\t10\t100\t1000\t10000\t\t10\t100\t1000\t10000");
+		out("a/e\t10\t100\t1000\t10000\t\t10\t100\t1000\t10000\t\t10\t100\t1000\t10000"+new_line);
 		for(int line = 0;line<num_lines;line++) {
-			System.out.print(all_eps[line]+"\t");
+			out(all_eps[line]+"\t");
 			for(int m=0;m<num_mechs;m++) {
 				double[][] m_r = results_line[m];
 				for(int column=0;column<num_columns;column++) {
 					double delta_mae = m_r[line][column] / min_mae[line][column];
-					System.out.print(df.format(delta_mae)+"\t");
+					out(df.format(delta_mae)+"\t");
 				}
-				System.out.print("\t");
+				out("\t");
 			}
-			System.out.println();
+			out(new_line);
 		}
 	}
 
