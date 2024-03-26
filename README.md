@@ -1,8 +1,6 @@
 # Benchmarking the Utility of $w$-event Differential Privacy Mechanisms -- When Baselines Become Mighty Competitors
-This code corresponds to the paper:
+This code corresponds to the paper: Schäler, C., Hütter, T., & Schäler, M. (2023). Benchmarking the Utility of w-Event Differential Privacy Mechanisms-When Baselines Become Mighty Competitors. Proceedings of the VLDB Endowment, 16(8), 1830-1842.
 
-Schäler, Christine;  Hütter, Thomas;  Schäler, Martin: Benchmarking the utility of w-event differential privacy mechanisms : when baselines become mighty competitors.
-2022, KIT scientific working papers no. 194. (https://primo.bibliothek.kit.edu/permalink/f/coi3a3/KITSRC1813797854)
 
 ## Reproduce the experiments
 
@@ -16,11 +14,11 @@ sh scripts/perform-experiments.sh
 The `Dockerfile` in the root directory of this repository allows to reproduce the entire experimental evaluation within a Docker a container. To do so, please execute the following commands:
 ```
 mkdir -p results
-docker build --no-cache -t jedi-experiments .
-docker run -d -ti --name jedi-exp --mount type=bind,source="$(pwd)"/results,target=/usr/src/app/streamdp-benchmark/results dpbench-experiments
+docker build --no-cache -t streamdp-benchmark .
+docker run -d -ti --name streamdp-exp --mount type=bind,source="$(pwd)"/results,target=/usr/src/app/streamdp-benchmark/results streamdp-benchmark
 ```
 
-This command will persistently store the experimental results in the mounted directory (here, in the created directory `results`). In case that the data should not be persistently stored, remove the `--mount type=bind,source="$(pwd)"/results,target=/usr/src/app/jedi-experiments/results` argument.
+This command will persistently store the experimental results in the mounted directory (here, in the created directory `results`). In case that the data should not be persistently stored, remove the `--mount type=bind,source="$(pwd)"/results,target=/usr/src/app/streamdp-benchmark/results` argument.
 
 ## Citation:
 
