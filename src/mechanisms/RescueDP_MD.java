@@ -6,7 +6,7 @@ import java.util.*;
  * Re-implementation of RescueDP mechanism  
  * Q.Wang et al. 2018. Real-time and spatio-temporal crowd-sourced social network
  * data publishing with differential privacy. IEEE Trans. on Dependable and Secure
- * Computing (TDSC) 15, 4 (2018), 591–606.
+ * Computing (TDSC) 15, 4 (2018), 591-606.
  * 
  * @author b1074672
  *

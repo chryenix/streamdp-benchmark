@@ -7,7 +7,7 @@ import java.util.Collections;
 
 /**
  * Re-implementation of BD mechanism without grouping from 
- * G. Kellaris et al. 2014. Differentially Private Event Sequences over Infinite Streams. Proc. VLDB Endow. 7, 12 (2014), 1155–1166.
+ * G. Kellaris et al. 2014. Differentially Private Event Sequences over Infinite Streams. Proc. VLDB Endow. 7, 12 (2014), 1155-1166.
  * 
  * @author b1074672
  *

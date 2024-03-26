@@ -12,7 +12,7 @@ import java.util.BitSet;
  * 
  * The original implementation supports event-level privacy. That is, for w-event DP the DP guarantee holds for w=1 only. 
  * Thus, we extended FAST using uniform budget distribution as suggested in 
- * G. Kellaris et al. 2014. Differentially Private Event Sequences over Infinite Streams. Proc. VLDB Endow. 7, 12 (2014), 1155–1166.
+ * G. Kellaris et al. 2014. Differentially Private Event Sequences over Infinite Streams. Proc. VLDB Endow. 7, 12 (2014), 1155-1166.
  * 
  * Note, the original authors made binaries of their implementation available under http://www.mathcs.emory.edu/~lxiong/aims/FAST/ 
  * The binaries are not available anymore and did not contain any license agreement.

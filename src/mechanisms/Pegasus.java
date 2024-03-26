@@ -8,8 +8,8 @@ import java.util.ArrayList;
 /**
  * Re-implementation of Pegasus mechanism without grouping from 
  *  Y. Chen, A. Machanavajjhala, M. Hay, and G. Miklau. 2017. PeGaSus: Data-
- *  Adaptive Differentially Private Stream Processing. In Proc. Intíl Conf. on Computer
- *  and Communications Security (CCS). ACM, 1375ñ1388.
+ *  Adaptive Differentially Private Stream Processing. In Proc. Intl Conf. on Computer
+ *  and Communications Security (CCS). ACM, 1375-1388.
  * 
  * @author b1074672
  *
@@ -55,7 +55,7 @@ public class Pegasus extends Mechansim {
     public ArrayList<double[]> run(ArrayList<double[]> org_stream) {
 
         //init
-        init(); //aederung des w von au√üen..
+        init(); //aederung des w von aussen..
         final int length = org_stream.size();
         ArrayList<double[]> sanitized_stream = new ArrayList<double[]>(length);
         int no_dim = org_stream.get(0).length;

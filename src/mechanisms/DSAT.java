@@ -8,8 +8,8 @@ import java.util.Arrays;
 /**
  * Re-implementation of DSAT mechanism without grouping from 
  * H. Li et al. 2015. Differentially private histogram publication for dynamic datasets: 
- * an adaptive sampling approach. In Proc. Int’l Conf. on Information and Knowledge
- * Management (CIKM). ACM, 1001–1010.
+ * an adaptive sampling approach. In Proc. Intl Conf. on Information and Knowledge
+ * Management (CIKM). ACM, 1001-1010.
  * 
  * @author b1074672
  *

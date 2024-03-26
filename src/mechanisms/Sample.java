@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Re-implementation of baseline mechanism Sample from 
- * G. Kellaris et al. 2014. Differentially Private Event Sequences over Infinite Streams. Proc. VLDB Endow. 7, 12 (2014), 1155–1166.
+ * G. Kellaris et al. 2014. Differentially Private Event Sequences over Infinite Streams. Proc. VLDB Endow. 7, 12 (2014), 1155-1166.
  * 
  * @author b1074672
  *
