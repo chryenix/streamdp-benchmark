@@ -11,6 +11,7 @@ from timeeval.adapters import DockerAdapter
 from timeeval.params import FixedParameters
 from timeeval.resource_constraints import GB
 
+from argparse import ArgumentParser
 import numpy as np
 from timeeval.utils.window import ReverseWindowing
 
@@ -19,8 +20,15 @@ def post_sLOF(scores: np.ndarray, args: dict) -> np.ndarray:
     return ReverseWindowing(window_size=window_size).fit_transform(scores)
 
 def main():
+    # Read command line arguments.
+    parser = ArgumentParser(description='Input parameters for anomaly detection \
+        experiment')
+    parser.add_argument('-d', '--datadir', type=str,
+        required=True, help='<Required> Filepath where the data is stored.')
+    args = parser.parse_args()
+
     # load datasets and select them
-    dm = MultiDatasetManager([Path("/root/th/dpbench/data")])  # or the path to your datasets (requires a datasets.csv-file in the folder)
+    dm = MultiDatasetManager([Path(args.datadir)])  # or the path to your datasets (requires a datasets.csv-file in the folder)
     datasets = dm.select()  # selects ALL available datasets
     print("#Datasets: " + str(len(datasets)))
     # datasets = dm.select(min_anomalies=2)  # select all datasets with at least 2 anomalies
