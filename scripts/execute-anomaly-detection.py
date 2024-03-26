@@ -28,7 +28,7 @@ def main():
     args = parser.parse_args()
 
     # load datasets and select them
-    dm = MultiDatasetManager([Path(args.datadir)])  # or the path to your datasets (requires a datasets.csv-file in the folder)
+    dm = MultiDatasetManager([Path(Path.cwd() / args.datadir)])  # or the path to your datasets (requires a datasets.csv-file in the folder)
     datasets = dm.select()  # selects ALL available datasets
     print("#Datasets: " + str(len(datasets)))
     # datasets = dm.select(min_anomalies=2)  # select all datasets with at least 2 anomalies
