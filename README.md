@@ -6,7 +6,7 @@ This code corresponds to the paper: Schäler, C., Hütter, T., & Schäler, M. (2
 
 In order to perform the experiments and plot the results by Schaeler et al. (2023), the following steps have to be performed. Unfortunately, we are not able to share the experimental data due to conflicting licenses.
 ```
-sh scripts/perform-experiments.sh
+sh scripts/perform-experiment.sh
 ```
 
 ### Reproduce the experiments within a Docker container
