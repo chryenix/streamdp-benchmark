@@ -27,7 +27,7 @@
 sh scripts/diff-privacy-experiments.sh
 
 # Execute anomaly detection experiments.
-python3.7 execute-anomaly-detection.py
+python3.7 scripts/execute-anomaly-detection.py
 
 # TODO: Plot experimental results.
 # sh scripts/plot-results.sh
