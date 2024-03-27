@@ -246,7 +246,7 @@ public class Experiment {
                 }
                 inFile.close();
             } else {
-                System.err.println("File not found");
+                System.err.println("File not found "+trajFile.getCanonicalPath());
             }
         } catch (IOException e) {
             System.err.println(e);
@@ -269,7 +269,7 @@ public class Experiment {
                 }
                 inFile.close();
             } else {
-                System.err.println("File not found");
+                System.err.println("File not found "+trajFile.getCanonicalPath());
             }
         } catch (IOException e) {
             System.err.println(e);
@@ -333,7 +333,7 @@ public class Experiment {
                 }
                 inFile.close();
             } else {
-                System.err.println("File not found");
+                System.err.println("File not found "+trajFile.getCanonicalPath());
             }
         } catch (IOException e) {
             System.err.println(e);
@@ -362,7 +362,7 @@ public class Experiment {
                 }
                 inFile.close();
             } else {
-                System.err.println("File does not exist! " + filename);
+                System.err.println("File does not exist! " + filename+ " "+trajFile.getCanonicalPath());
             }
         } catch (IOException e) {
             System.err.println(e);
@@ -401,7 +401,7 @@ public class Experiment {
                 }
                 inFile.close();
             } else {
-                System.err.println("File does not exist! " + filename);
+                System.err.println("File does not exist! " + filename+" "+trajFile.getCanonicalPath());
             }
         } catch (IOException e) {
             System.err.println(e);
@@ -517,7 +517,7 @@ public class Experiment {
                 }
                 inFile.close();
             } else {
-                System.err.println("File does not exist! " + filename);
+                System.err.println("File does not exist! " + filename+" "+trajFile.getCanonicalPath());
             }
         } catch (IOException e) {
             System.err.println(e);
@@ -545,7 +545,7 @@ public class Experiment {
                 }
                 inFile.close();
             } else {
-                System.err.println("File does not exist! " + filename);
+                System.err.println("File does not exist! " + filename+" "+trajFile.getCanonicalPath());
             }
         } catch (IOException e) {
             System.err.println(e);
