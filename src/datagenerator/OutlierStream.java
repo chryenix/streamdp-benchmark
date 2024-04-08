@@ -2,6 +2,7 @@ package datagenerator;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -496,8 +497,8 @@ public class OutlierStream {
     }
     
     
-    static final String DODGERS_EVENTS = ".\\data\\Dodgers.events";
-    static final String DODGERS_DATA = ".\\data\\Dodgers.data";
+    static final String DODGERS_EVENTS = "."+File.separator+"data"+File.separator+"Dodgers.events";
+    static final String DODGERS_DATA = "."+File.separator+"data"+File.separator+"Dodgers.data";
     /**
      * Download file at https://archive.ics.uci.edu/ml/datasets/Dodgers+Loop+Sensor
      * @param file_location

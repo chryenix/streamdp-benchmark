@@ -51,15 +51,15 @@ public class Experiment {
     //public static final String[] FILE_NAMES = {"Wang_Taxi_ECMLPKDD_d=3750_len=672.csv","FAST_Flu_Outpatient[5-24]_seasons06-10_d=1_len=209.csv","FAST_unemploy_black_women_[16-19]_d=1_len=478.csv","wc_kellaris_data1320","Flu_NumInfDeath[18-64]_seasons12-19_d=1_len=374.csv","StatFlu_infLikeIllness_d=51_len=492.csv","DSAT_Taxi_TDrive_d=100_len=169.csv","GEFComDay"};
 
     //Data set paths    
-    static final String WORLD_CUP_DATA_SET = ".\\data\\wc_kellaris_data1320.csv";
-    static final String STAT_FLU_DATA_SET = ".\\data\\StatFlu_infLikeIllness_d=51_len=492.csv";// old: NATIONAL_CUSTOMS_DATA_SET
-    static final String TDRIVE_DATA_SET = ".\\data\\DSAT_Taxi_TDrive_d=100_len=168.csv";
-    static final String FAST_FLU_OUTPATIENT_DATA_SET = ".\\data\\Flu_outpatient[5-24]-1997-2021_d=1_len1250.csv";
-    static final String FAST_UNEMPLOY_DATA_SET = ".\\data\\FAST_unemploy_black_women_[16-19]_d=1_len=478.csv";
-    static final String WANG_TAXI_ECPK_DATA_SET = ".\\data\\Wang_Taxi_ECMLPKDD_d=3750_len=672.csv";
+    static final String WORLD_CUP_DATA_SET = "."+File.separator+"data"+File.separator+"wc_kellaris_data1320.csv";
+    static final String STAT_FLU_DATA_SET = "."+File.separator+"data"+File.separator+"StatFlu_infLikeIllness_d=51_len=492.csv";// old: NATIONAL_CUSTOMS_DATA_SET
+    static final String TDRIVE_DATA_SET = "."+File.separator+"data"+File.separator+"DSAT_Taxi_TDrive_d=100_len=168.csv";
+    static final String FAST_FLU_OUTPATIENT_DATA_SET = "."+File.separator+"data"+File.separator+"Flu_outpatient[5-24]-1997-2021_d=1_len1250.csv";
+    static final String FAST_UNEMPLOY_DATA_SET = "."+File.separator+"data"+File.separator+"FAST_unemploy_black_women_[16-19]_d=1_len=478.csv";
+    static final String WANG_TAXI_ECPK_DATA_SET = "."+File.separator+"data"+File.separator+"Wang_Taxi_ECMLPKDD_d=3750_len=672.csv";
     // unkown where used
-    static final String INFLUENZA_NUM_DEATH_DATA_SET 	= ".\\data\\Flu_NumInfDeath[18-64]_seasons12-19_d=1_len=374.csv";
-    private static final String ONLINE_RETAIL_DATA 		= ".\\data\\AdaPub-OnlineRetail-l=374_d=1289.csv";
+    static final String INFLUENZA_NUM_DEATH_DATA_SET 	= "."+File.separator+"data"+File.separator+"Flu_NumInfDeath[18-64]_seasons12-19_d=1_len=374.csv";
+    private static final String ONLINE_RETAIL_DATA 		= "."+File.separator+"data"+File.separator+"AdaPub-OnlineRetail-l=374_d=1289.csv";
     
     public static String RESLT_DIR = "./results";
     /**

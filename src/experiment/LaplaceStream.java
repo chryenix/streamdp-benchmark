@@ -59,7 +59,7 @@ public class LaplaceStream {
 				my_numbers[0][i]=d;
 			}
 		}else if(USAGE_MODE==USAGE_MODE_PRECOMPUTED){
-			File randomNumbersFile = new File(".\\data\\laplace_numbers_per_mechanism_100_iterations.csv");//The file location
+			File randomNumbersFile = new File("."+File.separator+"data"+File.separator+"laplace_numbers_per_mechanism_100_iterations.csv");//The file location
 
 	        try {
 	            if (randomNumbersFile.exists()) {
