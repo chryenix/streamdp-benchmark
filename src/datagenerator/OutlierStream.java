@@ -452,7 +452,6 @@ public class OutlierStream {
 	 * @param w
 	 */
     static void create_sanitized_streams_vary_w(int[] mechanisms, OutlierStream stream, String data_set, double epsilon, int num_iterations, int[] ws) {
-    	if(!create_w_experiments) return;
         System.out.println("w-event Experimentator for Outlier Stream testing for mechanisms " + Arrays.toString(mechanisms) + " w in " + Arrays.toString(ws) + " and e = " + epsilon);
         double start = System.currentTimeMillis();
         Arrays.sort(mechanisms);

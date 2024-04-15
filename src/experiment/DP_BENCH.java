@@ -21,8 +21,9 @@ public class DP_BENCH {
 			System.out.println("DP_BENCH h: print this manual");
 			System.out.println("a: run artificial data experiments");
 			System.out.println("r: run real-world-data experiments");
-			System.out.println("p: print aggregated results to console. Note, results need to be created first using a and r arguments.");
+			System.out.println("p: print aggregated results to console and figures folder. Note, results need to be created first using a and r arguments.");
 			System.out.println("g: geneate sanitized streams for outlier detetion. Storing data under "+OutlierStream.CSV_DIR);
+			System.out.println("o: print anomaly-detection results to console and figures folder. Note, results need to be created first using g argument. In addtion, you need to run the anomaly detection framework");
 		}
 		if(contains(args, "a")) {
 			File RESLT_DIR = new File(Experiment.RESLT_DIR);
@@ -51,6 +52,10 @@ public class DP_BENCH {
 			}
 			System.out.println("Geneate sanitized streams for outlier detetion. Storing data under "+OutlierStream.CSV_DIR);
 			OutlierStream.main(null);
+		}
+		if(contains(args, "o")) {
+			System.out.println("Creating aggregated results for Figure 6");
+			Eval.run();
 		}
 	}
 	private static boolean contains(String[] array, String to_match) {
