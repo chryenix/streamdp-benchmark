@@ -51,7 +51,7 @@ public class DP_BENCH {
 				CSV_DIR.mkdir();
 			}
 			System.out.println("Geneate sanitized streams for outlier detetion. Storing data under "+OutlierStream.CSV_DIR);
-			OutlierStream.main(null);
+			System.err.println();
 		}
 		if(contains(args, "o")) {
 			System.out.println("Creating aggregated results for Figure 6");
