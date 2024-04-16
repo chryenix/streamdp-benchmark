@@ -38,7 +38,8 @@ public class OutlierStream {
 	private static Random rand = new Random(12345);
 	
 	//Path to real-world data
-	public static String CSV_DIR = "./csv";
+	//public static String CSV_DIR = "./csv";
+	public static String CSV_DIR = "./data/anomaly-detection";
 	static final int OUTPUT_MODE_CONSOLE = 0;
 	static final int OUTPUT_MODE_FILE = 1;
 	static int OUTPUT_MODE = OUTPUT_MODE_FILE; 
