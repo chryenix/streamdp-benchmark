@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +43,21 @@ public class Eval {
 			System.err.println(e);
 		}
 	    return null;
+	}
+	
+	static String[] get_all_directory_names(String dir){
+		File directory = new File(dir);
+		if(!directory.exists()) {
+			System.err.println(dir+" does not exist");
+		}
+		
+		String[] directories = directory.list(new FilenameFilter() {
+			@Override
+			public boolean accept(File current, String name) {
+				return new File(current, name).isDirectory();
+			}
+		});
+		return directories;
 	}
 	
 	static List<String> get_artificial_vary_e_results(List<String> all_results){
@@ -98,6 +114,156 @@ public class Eval {
 		create_and_print_tab_6();
 	}
 	
+	public static void run_anomaly_detection() {
+		
+		String[] directories = get_all_directory_names(Experiment.RESLT_DIR);
+		if(directories.length!=1) {
+			System.err.println("Eval.run_anomaly_detection() - result dir appears to contain no or multiple anomaly-detection results. Expecting one in "+Experiment.RESLT_DIR);
+			System.err.println(Arrays.toString(directories));
+			return;
+		}
+		File figures = new File(figures_dir);
+		if(!figures.exists()) {
+			figures.mkdir();
+		}
+		File result_file = new File(Experiment.RESLT_DIR+"/"+directories[0]+"/results.csv");
+
+		
+		//Read all results and store them
+		try {
+			if(!result_file.exists()) {
+				System.err.println(result_file.getCanonicalPath()+" Does not exist");
+				return;
+			}
+			System.out.println("Reading anomaly detection results from "+result_file.getCanonicalPath());
+			BufferedReader reader = new BufferedReader(new FileReader(result_file));
+			String line;
+			ArrayList<String[]> all_lines = new ArrayList<String[]>(20000);
+			reader.readLine();//skip heading
+			
+			int num_lines = 0;
+			while((line = reader.readLine()) != null) {
+				num_lines++;
+				String[] line_values = line.split(",");
+				String[] short_line = {line_values[0],line_values[2],line_values[line_values.length-1]};//e.g. [knn], [eps=0.1-dodgers-12-Sample-7.csv,UNSUPERVISED], [0.5254466079247907]
+				all_lines.add(short_line);
+				if(num_lines%100==0) {
+					System.out.println(Arrays.toString(short_line));
+				}
+			}
+			reader.close();
+			
+			String[] mechanism_names = {"Uniform", "Sample", "Fast", "BD", "BA", "RescueDP", "Pegasus", "AdaPub", "DSAT"};
+			String[] data_set_names = {"Dodgers MLAED","Pattern Anomalies LOF","Extrema Anomalies LOF"};
+			
+			open_result_file("fig_6.tsv");
+			// Fig 6 (a) vary-w experiments
+			out("Fig 6 (a)");
+			for(String data_set : data_set_names) {
+				out(new_line);
+				out(data_set);
+				out(new_line);
+				String[] w_s = {"1","2","4","8","16","32"};
+				for(String w : w_s) {
+					out("\tw="+w);
+				}
+				out(new_line);
+				for(String m : mechanism_names) {
+					out(m);//TODO results
+					print_results(data_set, m, "w=", all_lines);
+					out(new_line);
+				}
+				out(new_line);
+				out(new_line);
+			}
+			
+			out(new_line);
+			// Fig 6 (b) vary-e experiments
+			out("Fig 6 (b)");
+			for(String data_set : data_set_names) {
+				out(new_line);
+				out(data_set);
+				out(new_line);
+				String[] e_s = {"0.1","0.3","0.5","0.7","0.9","1.0"};
+				for(String e : e_s) {
+					out("\te="+e);
+				}
+				out(new_line);
+				for(String m : mechanism_names) {
+					out(m);//TODO results
+					print_results(data_set, m, "eps=", all_lines);
+					out(new_line);
+				}
+				out(new_line);
+				out(new_line);
+			}
+			
+			close_result_file();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void print_results(String data_set, String mechanism, String experiment, ArrayList<String[]> all_lines) {
+		ArrayList<String[]> relevant_lines = get_relevant_lines(data_set, mechanism, experiment, all_lines);
+		/*for(String[] line : relevant_lines) {
+			System.out.println(Arrays.toString(line));	
+		}*/
+		String[] params = null; 
+		if(experiment.equals("w=")) {
+			String[] temp = {"1","2","4","8","16","32"};
+			params = temp;
+		}else if(experiment.equals("eps=")){
+			String[] temp = {"0.1","0.3","0.5","0.7","0.9","1.0"};
+			params = temp;
+		}else{
+			System.err.println("Eval.print_results() unknown experiment type "+experiment);
+			return;
+		}
+		for(String w : params) {
+			double counter = 0;
+			double sum = 0;
+			for(String[] line : relevant_lines) {
+				if(line[1].startsWith(experiment+w+"-")) {
+					counter++;
+					double val = Double.parseDouble(line[2]);
+					sum += val;
+				}
+			}
+			if(counter!=10) {
+				System.err.println("Eval.print_results() should always be 10 repitions, but got "+counter);
+			}
+			double agg = sum / counter;
+			out("\t"+agg);
+		}
+	}
+
+	private static ArrayList<String[]> get_relevant_lines(String data_set, String mechanism, String experiment, ArrayList<String[]> all_lines) {
+		ArrayList<String[]> relevant_lines = new ArrayList<String[]>();
+		if(data_set.equals("Dodgers MLAED")) {
+			for(String[] line : all_lines) {
+				if(line[0].equals("dwt_mlead") && line[1].contains("dodgers") && line[1].contains(experiment) && line[1].contains(mechanism)) {
+					relevant_lines.add(line);
+				}
+			}
+		}else if(data_set.equals("Pattern Anomalies LOF")) {
+			for(String[] line : all_lines) {
+				if(line[0].equals("lof") && line[1].contains("pattern") && line[1].contains(experiment) && line[1].contains(mechanism)) {
+					relevant_lines.add(line);
+				}
+			}
+		}else if(data_set.equals("Extrema Anomalies LOF")) {
+			for(String[] line : all_lines) {
+				if(line[0].equals("lof") && line[1].contains("extrema") && line[1].contains(experiment) && line[1].contains(mechanism)) {
+					relevant_lines.add(line);
+				}
+			}
+		}else{
+			System.err.println("Eval.get_relevant_lines(): unknown data set "+data_set);
+		}
+		return relevant_lines;
+	}
+
 	private static void create_and_print_tab_6() {
 		open_result_file("tab_6.tsv");
 		// TODO Auto-generated method stub

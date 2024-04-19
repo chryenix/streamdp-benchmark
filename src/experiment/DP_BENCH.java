@@ -56,7 +56,7 @@ public class DP_BENCH {
 		}
 		if(contains(args, "o")) {
 			System.out.println("Creating aggregated results for Figure 6");
-			Eval.run();
+			Eval.run_anomaly_detection();
 		}
 	}
 	private static boolean contains(String[] array, String to_match) {
