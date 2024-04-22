@@ -73,6 +73,7 @@ RUN apt install gcc git git-lfs -y
 
 # Install java
 RUN apt install default-jre -y
+RUN apt-get install default-jdk -y
 
 # Clean apt
 RUN apt clean
