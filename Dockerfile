@@ -72,7 +72,7 @@ RUN python -m pip install --upgrade pip
 RUN apt install gcc git git-lfs -y
 
 # Install java
-RUN apt install default-jre
+RUN apt install default-jre -y
 
 # Clean apt
 RUN apt clean
