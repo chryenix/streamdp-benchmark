@@ -64,6 +64,9 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
 # Set python3.7 as the default python
 RUN update-alternatives --set python /usr/bin/python3.7
 
+# Install curl
+RUN apt install curl -y
+
 # Install pip
 RUN apt install python3-pip -y
 RUN python -m pip install --upgrade pip
@@ -77,6 +80,10 @@ RUN apt-get install default-jdk -y
 
 # Clean apt
 RUN apt clean
+
+# Install docker
+RUN curl -fsSL https://get.docker.com -o get-docker.sh
+RUN sh ./get-docker.sh --dry-run
 
 # Install python libraries using pip (including TimeEval)
 RUN pip install --no-cache-dir --upgrade pip && \
