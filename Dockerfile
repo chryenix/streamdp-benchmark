@@ -85,9 +85,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 RUN git clone https://github.com/chryenix/streamdp-benchmark.git
 WORKDIR ./streamdp-benchmark
 
-# TODO: Setup exeriment for regular differential privacy. Also, include relevant libraries and tools above.
-
 # Setup experiment for anomaly detection.
 RUN chmod 0755 scripts/perform-experiment.sh
 CMD scripts/perform-experiment.sh
-
