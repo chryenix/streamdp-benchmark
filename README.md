@@ -2,23 +2,26 @@
 This code corresponds to the paper: Schäler, C., Hütter, T., & Schäler, M. (2023). Benchmarking the Utility of w-Event Differential Privacy Mechanisms-When Baselines Become Mighty Competitors. Proceedings of the VLDB Endowment, 16(8), 1830-1842.
 
 
+## Software requirements
+
+The following list of software is required to execute the experiments:
+  * bash
+  * python 3
+  * curl
+  * java jdk
+  * java jre
+  * docker
+  * excel (for ploting)
+
+
 ## Reproduce the experiments
 
-In order to perform the experiments and plot the results by Schaeler et al. (2023), the following steps have to be performed. Unfortunately, we are not able to share the experimental data due to conflicting licenses.
+We provide a convenience script to perform the experiments and plot the results shown in Schäler et al. (2023). Note that we assume that all datasets are stored in `./data`. However, due to conflicting licenses, we are not allowed to share the experimental data publicly. The convenience script is executed from the root directory of the repository as follows:
 ```
 sh scripts/perform-experiment.sh
 ```
 
-### Reproduce the experiments within a Docker container
-
-The `Dockerfile` in the root directory of this repository allows to reproduce the entire experimental evaluation within a Docker a container. To do so, please execute the following commands:
-```
-mkdir -p results
-docker build --no-cache -t streamdp-benchmark .
-docker run -d -ti --name streamdp-exp --mount type=bind,source="$(pwd)"/results,target=/usr/src/app/streamdp-benchmark/results streamdp-benchmark
-```
-
-This command will persistently store the experimental results in the mounted directory (here, in the created directory `results`). In case that the data should not be persistently stored, remove the `--mount type=bind,source="$(pwd)"/results,target=/usr/src/app/streamdp-benchmark/results` argument.
+Further note that the experiments take approximately 24 hours to complete. The plots can be reproduced by copying the results from `./results` in the excel file in `./figures/vldb-reproducibility.xlsx`.
 
 ## Citation:
 
