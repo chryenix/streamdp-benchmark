@@ -29,5 +29,5 @@ sh scripts/diff-privacy-experiments.sh
 # Execute anomaly detection experiments.
 python3.7 scripts/execute-anomaly-detection.py -d ./data
 
-# TODO: Plot experimental results.
-# sh scripts/plot-results.sh
+# Prepare ploting the experimental results.
+java -cp ./lib/commons-math3-3.6.1.jar:./lib/colt.jar:./build/ experiment.DP_BENCH o
