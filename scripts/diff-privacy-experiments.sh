@@ -27,4 +27,4 @@
 javac -sourcepath src -classpath classes:lib/colt.jar:lib/commons-math3-3.6.1.jar src/experiment/DP_BENCH.java -d build
 
 # Execute the JAVA binary with all differential privacy experiments.
-java -cp ./lib/commons-math3-3.6.1.jar:./lib/colt.jar:./build/ experiment.DP_BENCH h a r p g
+java -cp ./lib/commons-math3-3.6.1.jar:./lib/colt.jar:./build/ experiment.DP_BENCH a r p g
