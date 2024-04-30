@@ -21,7 +21,9 @@ We provide a convenience script to perform the experiments and plot the results 
 sh scripts/perform-experiment.sh
 ```
 
-Further note that the experiments take approximately 24 hours to complete. The plots can be reproduced by copying the results from `./results` in the excel file in `./figures/vldb-reproducibility.xlsx`.
+After running the experiments, the aggregated raw data for Figures 2a, 2b, 3, 5 and 6, as well as Table 6 are located in the `./figures` directory. To plot the data, open the `vldb reproducability.xlsx` file, also located in `./figures` directory. It contains a tab for each `.tsv` file following the same naming convention
+
+**Further note that the experiments take approximately 24 hours to complete.**
 
 ## Citation:
 
